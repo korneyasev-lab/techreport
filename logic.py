@@ -395,13 +395,29 @@ class ReportLogic:
             # Заголовок
             title = doc.add_heading('ЕЖЕНЕДЕЛЬНЫЙ ОТЧЁТ КОНТРОЛЯ ТЕХНОЛОГИИ', level=0)
             title.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            for run in title.runs:
+                run.font.size = Pt(16)
+            title_format = title.paragraph_format
+            title_format.line_spacing = 1.0
+            title_format.space_after = Pt(6)
 
             # Параметры отчёта
-            doc.add_paragraph(f"Период: {self.report_params['week']}")
-            doc.add_paragraph(f"Год: {self.report_params['year']}")
-            doc.add_paragraph(f"Месяц: {self.report_params['month']}")
-            doc.add_paragraph(f"Дата создания: {self.report_params['created_at']}")
-            doc.add_paragraph()  # Пустая строка
+            for text in [
+                f"Период: {self.report_params['week']}",
+                f"Год: {self.report_params['year']}",
+                f"Месяц: {self.report_params['month']}",
+                f"Дата создания: {self.report_params['created_at']}"
+            ]:
+                p = doc.add_paragraph(text)
+                for run in p.runs:
+                    run.font.size = Pt(14)
+                p_format = p.paragraph_format
+                p_format.line_spacing = 1.0
+                p_format.space_after = Pt(3)
+
+            # Пустая строка
+            spacer = doc.add_paragraph()
+            spacer.paragraph_format.space_after = Pt(6)
 
             # Блоки
             for block_num in range(1, config.TOTAL_BLOCKS + 1):
@@ -409,7 +425,13 @@ class ReportLogic:
                 block_data = config.REPORT_BLOCKS[block_key]
 
                 # Заголовок блока
-                doc.add_heading(block_data['title'].upper(), level=1)
+                heading = doc.add_heading(block_data['title'].upper(), level=1)
+                for run in heading.runs:
+                    run.font.size = Pt(16)
+                heading_format = heading.paragraph_format
+                heading_format.line_spacing = 1.0
+                heading_format.space_before = Pt(6)
+                heading_format.space_after = Pt(3)
 
                 for i, element in enumerate(block_data['elements']):
                     element_key = f"{block_key}_element_{i}"
@@ -419,26 +441,55 @@ class ReportLogic:
 
                         # Label
                         p = doc.add_paragraph()
-                        p.add_run(element['label']).bold = True
+                        run = p.add_run(element['label'])
+                        run.bold = True
+                        run.font.size = Pt(14)
+                        p_format = p.paragraph_format
+                        p_format.line_spacing = 1.0
+                        p_format.space_after = Pt(2)
 
                         if isinstance(answer, list):
                             if answer:
                                 for item in answer:
-                                    doc.add_paragraph(f"✓ {item}", style='List Bullet')
+                                    item_p = doc.add_paragraph(f"✓ {item}", style='List Bullet')
+                                    for run in item_p.runs:
+                                        run.font.size = Pt(14)
+                                    item_p_format = item_p.paragraph_format
+                                    item_p_format.line_spacing = 1.0
+                                    item_p_format.space_after = Pt(2)
                             else:
-                                doc.add_paragraph("(нет отмеченных пунктов)")
+                                empty_p = doc.add_paragraph("(нет отмеченных пунктов)")
+                                for run in empty_p.runs:
+                                    run.font.size = Pt(14)
+                                empty_p.paragraph_format.line_spacing = 1.0
+                                empty_p.paragraph_format.space_after = Pt(2)
 
                         elif isinstance(answer, dict):
                             if answer.get('checkboxes'):
                                 for item in answer['checkboxes']:
-                                    doc.add_paragraph(f"✓ {item}", style='List Bullet')
+                                    item_p = doc.add_paragraph(f"✓ {item}", style='List Bullet')
+                                    for run in item_p.runs:
+                                        run.font.size = Pt(14)
+                                    item_p_format = item_p.paragraph_format
+                                    item_p_format.line_spacing = 1.0
+                                    item_p_format.space_after = Pt(2)
                             if answer.get('text'):
-                                doc.add_paragraph(f"Другое: {answer['text']}")
+                                text_p = doc.add_paragraph(f"Другое: {answer['text']}")
+                                for run in text_p.runs:
+                                    run.font.size = Pt(14)
+                                text_p.paragraph_format.line_spacing = 1.0
+                                text_p.paragraph_format.space_after = Pt(2)
 
                         else:
-                            doc.add_paragraph(str(answer))
+                            ans_p = doc.add_paragraph(str(answer))
+                            for run in ans_p.runs:
+                                run.font.size = Pt(14)
+                            ans_p.paragraph_format.line_spacing = 1.0
+                            ans_p.paragraph_format.space_after = Pt(2)
 
-                        doc.add_paragraph()  # Пустая строка
+                        # Минимальный отступ после элемента
+                        element_spacer = doc.add_paragraph()
+                        element_spacer.paragraph_format.space_after = Pt(3)
 
             # Сохранение документа
             doc.save(filepath)
