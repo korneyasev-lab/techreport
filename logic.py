@@ -5,26 +5,6 @@ import os
 from datetime import datetime
 import config
 
-try:
-    from reportlab.lib.pagesizes import A4
-    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-    from reportlab.lib.units import cm
-    from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, PageBreak
-    from reportlab.pdfbase import pdfmetrics
-    from reportlab.pdfbase.ttfonts import TTFont
-    from reportlab.lib.enums import TA_CENTER, TA_LEFT
-    PDF_AVAILABLE = True
-except ImportError:
-    PDF_AVAILABLE = False
-
-try:
-    from docx import Document
-    from docx.shared import Pt, Inches
-    from docx.enum.text import WD_ALIGN_PARAGRAPH
-    DOCX_AVAILABLE = True
-except ImportError:
-    DOCX_AVAILABLE = False
-
 
 class ReportLogic:
     """Класс для работы с логикой отчётов."""
@@ -247,7 +227,15 @@ class ReportLogic:
 
     def _save_report_pdf(self):
         """Сохраняет отчёт в PDF формат."""
-        if not PDF_AVAILABLE:
+        try:
+            from reportlab.lib.pagesizes import A4
+            from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+            from reportlab.lib.units import cm
+            from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, PageBreak
+            from reportlab.pdfbase import pdfmetrics
+            from reportlab.pdfbase.ttfonts import TTFont
+            from reportlab.lib.enums import TA_CENTER, TA_LEFT
+        except ImportError:
             return False, "Библиотека reportlab не установлена. Установите: pip install reportlab"
 
         try:
@@ -260,10 +248,10 @@ class ReportLogic:
             doc = SimpleDocTemplate(
                 filepath,
                 pagesize=A4,
-                rightMargin=2*cm,
-                leftMargin=2*cm,
-                topMargin=2*cm,
-                bottomMargin=2*cm
+                rightMargin=1.5*cm,
+                leftMargin=1.5*cm,
+                topMargin=1.5*cm,
+                bottomMargin=1.5*cm
             )
 
             # Попытка зарегистрировать шрифт с поддержкой кириллицы
@@ -294,8 +282,8 @@ class ReportLogic:
                 fontName=font_name,
                 fontSize=14,
                 alignment=TA_CENTER,
-                spaceAfter=24,
-                leading=20
+                spaceAfter=6,
+                leading=14
             )
 
             heading_style = ParagraphStyle(
@@ -303,9 +291,9 @@ class ReportLogic:
                 parent=styles['Heading2'],
                 fontName=font_name,
                 fontSize=14,
-                spaceAfter=16,
-                spaceBefore=12,
-                leading=18
+                spaceAfter=3,
+                spaceBefore=3,
+                leading=14
             )
 
             normal_style = ParagraphStyle(
@@ -313,8 +301,8 @@ class ReportLogic:
                 parent=styles['Normal'],
                 fontName=font_name,
                 fontSize=14,
-                spaceAfter=10,
-                leading=18
+                spaceAfter=2,
+                leading=14
             )
 
             # Контент
@@ -322,14 +310,14 @@ class ReportLogic:
 
             # Заголовок
             story.append(Paragraph("ЕЖЕНЕДЕЛЬНЫЙ ОТЧЁТ КОНТРОЛЯ ТЕХНОЛОГИИ", title_style))
-            story.append(Spacer(1, 0.8*cm))
+            story.append(Spacer(1, 0.2*cm))
 
             # Параметры отчёта
             story.append(Paragraph(f"Период: {self.report_params['week']}", normal_style))
             story.append(Paragraph(f"Год: {self.report_params['year']}", normal_style))
             story.append(Paragraph(f"Месяц: {self.report_params['month']}", normal_style))
             story.append(Paragraph(f"Дата создания: {self.report_params['created_at']}", normal_style))
-            story.append(Spacer(1, 1.2*cm))
+            story.append(Spacer(1, 0.4*cm))
 
             # Блоки
             for block_num in range(1, config.TOTAL_BLOCKS + 1):
@@ -337,7 +325,7 @@ class ReportLogic:
                 block_data = config.REPORT_BLOCKS[block_key]
 
                 story.append(Paragraph(block_data['title'].upper(), heading_style))
-                story.append(Spacer(1, 0.5*cm))
+                story.append(Spacer(1, 0.15*cm))
 
                 for i, element in enumerate(block_data['elements']):
                     element_key = f"{block_key}_element_{i}"
@@ -370,9 +358,9 @@ class ReportLogic:
                             answer_text = str(answer).replace('<', '&lt;').replace('>', '&gt;')
                             story.append(Paragraph(answer_text, normal_style))
 
-                        story.append(Spacer(1, 0.4*cm))
+                        story.append(Spacer(1, 0.1*cm))
 
-                story.append(Spacer(1, 0.8*cm))
+                story.append(Spacer(1, 0.25*cm))
 
             # Генерация PDF
             doc.build(story)
@@ -388,7 +376,11 @@ class ReportLogic:
 
     def _save_report_docx(self):
         """Сохраняет отчёт в DOCX формат."""
-        if not DOCX_AVAILABLE:
+        try:
+            from docx import Document
+            from docx.shared import Pt, Inches
+            from docx.enum.text import WD_ALIGN_PARAGRAPH
+        except ImportError:
             return False, "Библиотека python-docx не установлена. Установите: pip install python-docx"
 
         try:

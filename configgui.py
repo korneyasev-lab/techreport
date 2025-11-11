@@ -10,8 +10,8 @@ APP_TITLE = "Еженедельный контроль технологии"
 FONTS_WINDOWS = {
     "title": 20,
     "large": 16,
-    "medium": 14,
-    "small": 14,
+    "medium": 16,
+    "small": 16,
     "main_button": 16  # Крупные кнопки на главном экране
 }
 PADDING_WINDOWS = {"padx": 5, "pady": 3}  # Минимальные отступы
@@ -19,10 +19,10 @@ PADDING_WINDOWS = {"padx": 5, "pady": 3}  # Минимальные отступ�
 # --- Настройки для macOS/Linux ---
 FONTS_MACOS = {
     "title": 22,
-    "large": 18,
+    "large": 16,
     "medium": 16,
-    "small": 14,
-    "main_button": 18
+    "small": 16,
+    "main_button": 16
 }
 PADDING_MACOS = {"padx": 5, "pady": 3}  # Минимальные отступы
 
@@ -32,10 +32,12 @@ COLORS = {
     "yes_inactive": "#d3d3d3",    # Серый неактивный
     "no_active": "#dc3545",       # Красный для "Нет"
     "no_inactive": "#d3d3d3",
-    "text_yes": "white",
-    "text_no": "white",
-    "text_bg": "white",           # Фон текстовых полей
-    "text_fg": "black"            # Цвет текста
+    "text_yes": "black",          # Текст кнопок - черный
+    "text_no": "black",           # Текст кнопок - черный
+    "text_bg": "#d3d3d3",         # Фон текстовых полей - светло-серый
+    "text_fg": "black",           # Цвет текста - черный
+    "button_bg": "#d3d3d3",       # Фон кнопок - светло-серый
+    "button_fg": "black"          # Цвет текста кнопок - черный
 }
 
 # --- Тексты и сообщения ---

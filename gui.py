@@ -29,6 +29,18 @@ class ReportApp:
         self.FONT_MAIN_BUTTON = ("Arial", self.fonts["main_button"])
         self.FONT_README = ("Arial", 14)  # README шрифт 14
 
+        # Настройка стилей ttk
+        style = ttk.Style()
+        style.configure("TButton",
+                       background=configgui.COLORS["button_bg"],
+                       foreground=configgui.COLORS["button_fg"])
+        style.configure("TEntry",
+                       fieldbackground=configgui.COLORS["text_bg"],
+                       foreground=configgui.COLORS["text_fg"])
+        style.configure("TCombobox",
+                       fieldbackground=configgui.COLORS["text_bg"],
+                       foreground=configgui.COLORS["text_fg"])
+
         # Разворачиваем окно на весь экран
         try:
             self.root.state('zoomed')
@@ -107,6 +119,8 @@ class ReportApp:
             font=self.FONT_MAIN_BUTTON,
             width=25,
             height=2,
+            bg=configgui.COLORS["button_bg"],
+            fg=configgui.COLORS["button_fg"],
             command=self.show_report_params_screen
         ).pack(pady=self.padding["pady"] * 3)
 
@@ -116,6 +130,8 @@ class ReportApp:
             font=self.FONT_MAIN_BUTTON,
             width=25,
             height=2,
+            bg=configgui.COLORS["button_bg"],
+            fg=configgui.COLORS["button_fg"],
             command=self.show_archive
         ).pack(pady=self.padding["pady"] * 3)
 
@@ -125,6 +141,8 @@ class ReportApp:
             font=self.FONT_MAIN_BUTTON,
             width=25,
             height=2,
+            bg=configgui.COLORS["button_bg"],
+            fg=configgui.COLORS["button_fg"],
             command=self.root.quit
         ).pack(pady=self.padding["pady"] * 3)
 
@@ -396,7 +414,9 @@ class ReportApp:
                 frame,
                 text=item,
                 variable=var,
-                font=self.FONT_LARGE
+                font=self.FONT_LARGE,
+                bg=configgui.COLORS["button_bg"],
+                fg=configgui.COLORS["button_fg"]
             )
             cb.pack(anchor="w", pady=2)
             checkbox_vars.append((item, var))
@@ -471,7 +491,9 @@ class ReportApp:
             frame,
             textvariable=entry_var,
             font=self.FONT_LARGE,
-            width=40
+            width=40,
+            bg=configgui.COLORS["text_bg"],
+            fg=configgui.COLORS["text_fg"]
         )
         entry.pack(anchor="w", pady=2)
 
@@ -578,7 +600,9 @@ class ReportApp:
                 frame,
                 text=item,
                 variable=var,
-                font=self.FONT_LARGE
+                font=self.FONT_LARGE,
+                bg=configgui.COLORS["button_bg"],
+                fg=configgui.COLORS["button_fg"]
             )
             cb.pack(anchor="w", pady=2)
             checkbox_vars.append((item, var))
@@ -605,7 +629,9 @@ class ReportApp:
             other_frame,
             textvariable=text_var,
             font=self.FONT_LARGE,
-            width=50
+            width=50,
+            bg=configgui.COLORS["text_bg"],
+            fg=configgui.COLORS["text_fg"]
         )
         entry.pack(fill=tk.X, pady=2)
 
