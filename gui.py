@@ -172,7 +172,8 @@ class ReportApp:
             form_frame, textvariable=self.year_var, font=self.FONT_MEDIUM, width=32
         )
         year_entry.grid(row=0, column=1, padx=self.padding["padx"], pady=5)
-        self.year_var.trace_add("write", self._update_weeks)
+        self._update_weeks_timer = None
+        self.year_var.trace_add("write", self._schedule_update_weeks)
 
         # Месяц
         ttk.Label(form_frame, text="Месяц:", font=self.FONT_MEDIUM).grid(
@@ -185,7 +186,7 @@ class ReportApp:
         )
         month_combo.grid(row=1, column=1, padx=self.padding["padx"], pady=5)
         month_combo.set(configgui.MONTHS[datetime.now().month - 1])
-        month_combo.bind("<<ComboboxSelected>>", self._update_weeks)
+        month_combo.bind("<<ComboboxSelected>>", self._schedule_update_weeks)
 
         # Неделя
         ttk.Label(form_frame, text="Неделя:", font=self.FONT_MEDIUM).grid(
@@ -198,7 +199,8 @@ class ReportApp:
         )
         self.week_combo.grid(row=2, column=1, padx=self.padding["padx"], pady=5)
 
-        self._update_weeks()  # Первоначальное заполнение недель
+        # Отложенное заполнение недель для быстрой загрузки окна
+        self.root.after(1, self._update_weeks)
 
         # Кнопки
         btn_frame = ttk.Frame(form_frame)
@@ -213,6 +215,12 @@ class ReportApp:
             btn_frame, text="Назад",
             command=self.show_main_screen, padding=10
         ).pack(side=tk.LEFT, padx=10)
+
+    def _schedule_update_weeks(self, *args):
+        """Планирует обновление недель с задержкой для избежания множественных вызовов."""
+        if self._update_weeks_timer:
+            self.root.after_cancel(self._update_weeks_timer)
+        self._update_weeks_timer = self.root.after(300, self._update_weeks)
 
     def _get_week_ranges_for_month(self, year, month_index):
         """Генерирует список недель с датами для указанного месяца."""
