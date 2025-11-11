@@ -247,8 +247,33 @@ class ReportApp:
 
     def start_report(self):
         """Проверяет параметры и запускает экран заполнения отчета."""
-        week = self.week_var.get()
+        # Валидация года
+        try:
+            year = int(self.year_var.get())
+            if year < 2000 or year > 2100:
+                messagebox.showerror(
+                    configgui.DIALOG_TITLES["error"],
+                    "Год должен быть в диапазоне 2000-2100"
+                )
+                return
+        except ValueError:
+            messagebox.showerror(
+                configgui.DIALOG_TITLES["error"],
+                "Год должен быть числом"
+            )
+            return
 
+        # Валидация месяца
+        month = self.month_var.get()
+        if not month or month not in configgui.MONTHS:
+            messagebox.showwarning(
+                configgui.DIALOG_TITLES["warning"],
+                "Пожалуйста, выберите месяц"
+            )
+            return
+
+        # Валидация недели
+        week = self.week_var.get()
         if not week:
             messagebox.showwarning(
                 configgui.DIALOG_TITLES["warning"],
@@ -259,8 +284,8 @@ class ReportApp:
         # Инициализация отчёта в логике
         self.logic.init_report(
             week=week,
-            year=self.year_var.get(),
-            month=self.month_var.get()
+            year=str(year),
+            month=month
         )
 
         self.current_block = 1
@@ -676,10 +701,106 @@ class ReportApp:
         self.show_block_screen()
 
     def save_report(self):
-        """Сохраняет отчёт через логику."""
+        """Сохраняет отчёт через логику с валидацией."""
         self.save_current_block_data()
 
-        success, result = self.logic.save_report()
+        # Валидация отчёта
+        valid, error_message = self.logic.validate_report()
+        if not valid:
+            messagebox.showwarning(
+                configgui.DIALOG_TITLES["warning"],
+                error_message
+            )
+            return
+
+        # Показываем диалог выбора формата
+        self.show_export_format_dialog()
+
+    def show_export_format_dialog(self):
+        """Показывает диалог выбора формата экспорта."""
+        # Создаём модальное окно
+        dialog = tk.Toplevel(self.root)
+        dialog.title("Выбор формата экспорта")
+        dialog.geometry("400x250")
+        dialog.transient(self.root)
+        dialog.grab_set()
+
+        # Центрируем окно
+        dialog.update_idletasks()
+        x = (dialog.winfo_screenwidth() // 2) - (dialog.winfo_width() // 2)
+        y = (dialog.winfo_screenheight() // 2) - (dialog.winfo_height() // 2)
+        dialog.geometry(f"+{x}+{y}")
+
+        # Контент
+        ttk.Label(
+            dialog,
+            text="Выберите формат для сохранения отчёта:",
+            font=self.FONT_MEDIUM
+        ).pack(pady=20)
+
+        # Переменная для выбранного формата
+        format_var = tk.StringVar(value="pdf")
+
+        # Радиокнопки
+        formats_frame = tk.Frame(dialog)
+        formats_frame.pack(pady=10)
+
+        tk.Radiobutton(
+            formats_frame,
+            text="PDF (Portable Document Format)",
+            variable=format_var,
+            value="pdf",
+            font=self.FONT_LARGE
+        ).pack(anchor="w", pady=5)
+
+        tk.Radiobutton(
+            formats_frame,
+            text="DOCX (Microsoft Word)",
+            variable=format_var,
+            value="docx",
+            font=self.FONT_LARGE
+        ).pack(anchor="w", pady=5)
+
+        tk.Radiobutton(
+            formats_frame,
+            text="TXT (Текстовый файл)",
+            variable=format_var,
+            value="txt",
+            font=self.FONT_LARGE
+        ).pack(anchor="w", pady=5)
+
+        # Кнопки
+        buttons_frame = tk.Frame(dialog)
+        buttons_frame.pack(pady=20)
+
+        def on_save():
+            export_format = format_var.get()
+            dialog.destroy()
+            self.execute_save_report(export_format)
+
+        def on_cancel():
+            dialog.destroy()
+
+        ttk.Button(
+            buttons_frame,
+            text="Сохранить",
+            command=on_save,
+            width=15
+        ).pack(side=tk.LEFT, padx=10)
+
+        ttk.Button(
+            buttons_frame,
+            text="Отмена",
+            command=on_cancel,
+            width=15
+        ).pack(side=tk.LEFT, padx=10)
+
+        # Ждём закрытия диалога
+        dialog.wait_window()
+
+    def execute_save_report(self, export_format):
+        """Выполняет сохранение отчёта в выбранном формате."""
+        success, result = self.logic.save_report(export_format=export_format)
 
         if success:
             messagebox.showinfo(
@@ -697,31 +818,188 @@ class ReportApp:
             )
 
     # ============================================================
-    # АРХИВ (ЗАГЛУШКА)
+    # АРХИВ
     # ============================================================
 
     def show_archive(self):
-        """Показывает экран архива (заглушка)."""
+        """Показывает экран архива с возможностью просмотра и удаления отчётов."""
         self.clear_container()
 
-        archive_frame = ttk.Frame(self.main_container, padding=40)
-        archive_frame.pack(expand=True)
-
+        # Заголовок
         ttk.Label(
-            archive_frame,
+            self.main_container,
             text=configgui.ARCHIVE_TITLE,
             font=self.FONT_TITLE
-        ).pack(pady=(0, 20))
+        ).pack(pady=15)
 
-        ttk.Label(
-            archive_frame,
-            text=configgui.ARCHIVE_PLACEHOLDER_TEXT,
+        # Получаем список отчётов
+        reports = self.logic.get_all_reports()
+
+        if not reports:
+            # Если отчётов нет
+            empty_frame = ttk.Frame(self.main_container)
+            empty_frame.pack(expand=True)
+
+            ttk.Label(
+                empty_frame,
+                text="Архив пуст\n\nСоздайте первый отчёт!",
+                font=self.FONT_LARGE,
+                justify=tk.CENTER
+            ).pack(pady=40)
+
+            ttk.Button(
+                empty_frame,
+                text="< Назад",
+                command=self.show_main_screen,
+                padding=10
+            ).pack()
+            return
+
+        # Фрейм для списка отчётов с прокруткой
+        list_frame = tk.Frame(self.main_container)
+        list_frame.pack(fill=tk.BOTH, expand=True, padx=40, pady=10)
+
+        # Canvas для прокрутки
+        canvas = tk.Canvas(list_frame)
+        scrollbar = ttk.Scrollbar(list_frame, orient="vertical", command=canvas.yview)
+        scrollable_frame = tk.Frame(canvas)
+
+        scrollable_frame.bind(
+            "<Configure>",
+            lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
+        )
+
+        canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
+        canvas.configure(yscrollcommand=scrollbar.set)
+
+        canvas.pack(side="left", fill="both", expand=True)
+        scrollbar.pack(side="right", fill="y")
+
+        # Заголовки таблицы
+        header_frame = tk.Frame(scrollable_frame, relief=tk.RAISED, borderwidth=1)
+        header_frame.pack(fill=tk.X, pady=(0, 5))
+
+        tk.Label(
+            header_frame,
+            text="Имя файла",
             font=self.FONT_MEDIUM,
-            justify=tk.CENTER
-        ).pack(pady=40)
+            width=40,
+            anchor="w"
+        ).grid(row=0, column=0, padx=10, pady=5, sticky="w")
+
+        tk.Label(
+            header_frame,
+            text="Дата создания",
+            font=self.FONT_MEDIUM,
+            width=20,
+            anchor="w"
+        ).grid(row=0, column=1, padx=10, pady=5)
+
+        tk.Label(
+            header_frame,
+            text="Действия",
+            font=self.FONT_MEDIUM,
+            width=20
+        ).grid(row=0, column=2, padx=10, pady=5)
+
+        # Строки с отчётами
+        for i, report in enumerate(reports):
+            row_frame = tk.Frame(
+                scrollable_frame,
+                relief=tk.GROOVE,
+                borderwidth=1,
+                bg="white" if i % 2 == 0 else "#f5f5f5"
+            )
+            row_frame.pack(fill=tk.X, pady=2)
+
+            # Имя файла
+            tk.Label(
+                row_frame,
+                text=report['filename'],
+                font=self.FONT_SMALL,
+                width=40,
+                anchor="w",
+                bg=row_frame["bg"]
+            ).grid(row=0, column=0, padx=10, pady=8, sticky="w")
+
+            # Дата создания
+            tk.Label(
+                row_frame,
+                text=report['created'],
+                font=self.FONT_SMALL,
+                width=20,
+                bg=row_frame["bg"]
+            ).grid(row=0, column=1, padx=10, pady=8)
+
+            # Кнопки действий
+            actions_frame = tk.Frame(row_frame, bg=row_frame["bg"])
+            actions_frame.grid(row=0, column=2, padx=10, pady=5)
+
+            ttk.Button(
+                actions_frame,
+                text="Просмотр",
+                command=lambda f=report['filename']: self.open_report(f),
+                width=10
+            ).pack(side=tk.LEFT, padx=5)
+
+            ttk.Button(
+                actions_frame,
+                text="Удалить",
+                command=lambda f=report['filename']: self.delete_report(f),
+                width=10
+            ).pack(side=tk.LEFT, padx=5)
+
+        # Кнопка назад внизу
+        bottom_frame = tk.Frame(self.main_container)
+        bottom_frame.pack(pady=15)
 
         ttk.Button(
-            archive_frame,
+            bottom_frame,
             text="< Назад",
-            command=self.show_main_screen
-        ).pack(pady=20)
+            command=self.show_main_screen,
+            padding=10
+        ).pack()
+
+    def open_report(self, filename):
+        """Открывает отчёт в системном просмотрщике."""
+        import os
+        import subprocess
+        import platform
+
+        filepath = os.path.join(config.REPORTS_FOLDER, filename)
+
+        try:
+            if platform.system() == 'Darwin':       # macOS
+                subprocess.call(('open', filepath))
+            elif platform.system() == 'Windows':    # Windows
+                os.startfile(filepath)
+            else:                                   # Linux
+                subprocess.call(('xdg-open', filepath))
+        except Exception as e:
+            messagebox.showerror(
+                configgui.DIALOG_TITLES["error"],
+                f"Не удалось открыть файл:\n{e}"
+            )
+
+    def delete_report(self, filename):
+        """Удаляет отчёт после подтверждения."""
+        confirm = messagebox.askyesno(
+            "Подтверждение удаления",
+            f"Вы уверены, что хотите удалить отчёт:\n\n{filename}\n\nЭто действие необратимо!"
+        )
+
+        if confirm:
+            success, message = self.logic.delete_report(filename)
+
+            if success:
+                messagebox.showinfo(
+                    configgui.DIALOG_TITLES["success"],
+                    message
+                )
+                # Обновляем экран архива
+                self.show_archive()
+            else:
+                messagebox.showerror(
+                    configgui.DIALOG_TITLES["error"],
+                    message
+                )

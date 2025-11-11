@@ -1,0 +1,8 @@
+# GUI (tkinter 84QB 2 :><?;5:B5 A Python)
+
+# -:A?>@B >BGQB>2
+reportlab>=4.0.0    # 5=5@0F8O PDF 4>:C<5=B>2
+python-docx>=1.0.0  # 5=5@0F8O DOCX 4>:C<5=B>2
+
+# ;O A1>@:8 exe
+pyinstaller>=6.0.0

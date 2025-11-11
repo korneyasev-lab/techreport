@@ -5,6 +5,26 @@ import os
 from datetime import datetime
 import config
 
+try:
+    from reportlab.lib.pagesizes import A4
+    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+    from reportlab.lib.units import cm
+    from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, PageBreak
+    from reportlab.pdfbase import pdfmetrics
+    from reportlab.pdfbase.ttfonts import TTFont
+    from reportlab.lib.enums import TA_CENTER, TA_LEFT
+    PDF_AVAILABLE = True
+except ImportError:
+    PDF_AVAILABLE = False
+
+try:
+    from docx import Document
+    from docx.shared import Pt, Inches
+    from docx.enum.text import WD_ALIGN_PARAGRAPH
+    DOCX_AVAILABLE = True
+except ImportError:
+    DOCX_AVAILABLE = False
+
 
 class ReportLogic:
     """Класс для работы с логикой отчётов."""
@@ -38,19 +58,76 @@ class ReportLogic:
         """Получает сохранённый ответ."""
         return self.answers.get(element_key, None)
 
-    def validate_block_data(self, block_num):
+    def validate_report(self):
         """
-        Валидация данных блока (пока не используется, но можно добавить).
+        Валидация всего отчёта перед сохранением.
         Возвращает (success, error_message).
         """
-        # TODO: Добавить валидацию обязательных полей
+        # Проверяем, что хотя бы одно поле заполнено
+        if not self.answers:
+            return False, "Отчёт полностью пустой. Заполните хотя бы одно поле."
+
+        # Проверка блока 1 - должны быть указаны либо отклонения, либо комментарий
+        block1_has_data = False
+        for key in self.answers:
+            if key.startswith('block_1_'):
+                value = self.answers[key]
+                if value:  # Не пустое значение
+                    if isinstance(value, list) and len(value) > 0:
+                        block1_has_data = True
+                        break
+                    elif isinstance(value, str) and value.strip():
+                        block1_has_data = True
+                        break
+
+        # Проверка блока 2 - должны быть отмечены участки или оборудование
+        block2_has_data = False
+        for key in self.answers:
+            if key.startswith('block_2_'):
+                value = self.answers[key]
+                if value:
+                    if isinstance(value, list) and len(value) > 0:
+                        block2_has_data = True
+                        break
+                    elif isinstance(value, str) and value.strip():
+                        block2_has_data = True
+                        break
+
+        # Проверка блока 3 - должна быть заполнена хотя бы температура
+        block3_has_data = False
+        for key in self.answers:
+            if key.startswith('block_3_'):
+                value = self.answers[key]
+                if value:
+                    if isinstance(value, str) and value.strip():
+                        block3_has_data = True
+                        break
+                    elif isinstance(value, dict):
+                        if value.get('checkboxes') or value.get('text'):
+                            block3_has_data = True
+                            break
+
+        # Хотя бы один блок должен быть заполнен
+        if not (block1_has_data or block2_has_data or block3_has_data):
+            return False, "Необходимо заполнить хотя бы один блок отчёта."
+
         return True, None
 
-    def save_report(self):
+    def save_report(self, export_format='txt'):
         """
-        Сохраняет отчёт в текстовый файл.
+        Сохраняет отчёт в указанном формате.
+        export_format: 'txt', 'pdf', 'docx'
         Возвращает (success, result), где result - имя файла или текст ошибки.
         """
+        if export_format == 'pdf':
+            return self._save_report_pdf()
+        elif export_format == 'docx':
+            return self._save_report_docx()
+        else:
+            return self._save_report_txt()
+
+    def _save_report_txt(self):
+        """Сохраняет отчёт в текстовый файл."""
         try:
             # Формирование имени файла
             week_str = self.report_params['week'].replace(" ", "_").replace("(", "").replace(")", "").replace("-", "_")
@@ -127,14 +204,16 @@ class ReportLogic:
     def get_all_reports(self):
         """
         Возвращает список всех сохранённых отчётов.
-        (Заглушка для будущего функционала архива)
+        Поддерживает форматы: .txt, .pdf, .docx
         """
         if not os.path.exists(config.REPORTS_FOLDER):
             return []
 
         reports = []
+        allowed_extensions = ('.txt', '.pdf', '.docx')
+
         for filename in os.listdir(config.REPORTS_FOLDER):
-            if filename.endswith('.txt'):
+            if filename.endswith(allowed_extensions):
                 filepath = os.path.join(config.REPORTS_FOLDER, filename)
                 stat = os.stat(filepath)
                 reports.append({
@@ -161,3 +240,214 @@ class ReportLogic:
                 return False, "Файл не найден."
         except Exception as e:
             return False, f"Ошибка при удалении: {e}"
+
+    # ============================================================
+    # ЭКСПОРТ В PDF
+    # ============================================================
+
+    def _save_report_pdf(self):
+        """Сохраняет отчёт в PDF формат."""
+        if not PDF_AVAILABLE:
+            return False, "Библиотека reportlab не установлена. Установите: pip install reportlab"
+
+        try:
+            # Формирование имени файла
+            week_str = self.report_params['week'].replace(" ", "_").replace("(", "").replace(")", "").replace("-", "_")
+            filename = f"Отчёт_{week_str}_{self.report_params['year']}.pdf"
+            filepath = os.path.join(config.REPORTS_FOLDER, filename)
+
+            # Создание PDF документа
+            doc = SimpleDocTemplate(
+                filepath,
+                pagesize=A4,
+                rightMargin=2*cm,
+                leftMargin=2*cm,
+                topMargin=2*cm,
+                bottomMargin=2*cm
+            )
+
+            # Попытка зарегистрировать шрифт с поддержкой кириллицы
+            try:
+                # Пытаемся найти системный шрифт
+                import platform
+                if platform.system() == 'Windows':
+                    font_path = 'C:/Windows/Fonts/arial.ttf'
+                elif platform.system() == 'Darwin':  # macOS
+                    font_path = '/System/Library/Fonts/Supplemental/Arial.ttf'
+                else:  # Linux
+                    font_path = '/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf'
+
+                if os.path.exists(font_path):
+                    pdfmetrics.registerFont(TTFont('CustomFont', font_path))
+                    font_name = 'CustomFont'
+                else:
+                    font_name = 'Helvetica'
+            except:
+                font_name = 'Helvetica'
+
+            # Стили
+            styles = getSampleStyleSheet()
+
+            title_style = ParagraphStyle(
+                'CustomTitle',
+                parent=styles['Heading1'],
+                fontName=font_name,
+                fontSize=16,
+                alignment=TA_CENTER,
+                spaceAfter=20
+            )
+
+            heading_style = ParagraphStyle(
+                'CustomHeading',
+                parent=styles['Heading2'],
+                fontName=font_name,
+                fontSize=14,
+                spaceAfter=10
+            )
+
+            normal_style = ParagraphStyle(
+                'CustomNormal',
+                parent=styles['Normal'],
+                fontName=font_name,
+                fontSize=11,
+                spaceAfter=6
+            )
+
+            # Контент
+            story = []
+
+            # Заголовок
+            story.append(Paragraph("ЕЖЕНЕДЕЛЬНЫЙ ОТЧЁТ КОНТРОЛЯ ТЕХНОЛОГИИ", title_style))
+            story.append(Spacer(1, 0.5*cm))
+
+            # Параметры отчёта
+            story.append(Paragraph(f"Период: {self.report_params['week']}", normal_style))
+            story.append(Paragraph(f"Год: {self.report_params['year']}", normal_style))
+            story.append(Paragraph(f"Месяц: {self.report_params['month']}", normal_style))
+            story.append(Paragraph(f"Дата создания: {self.report_params['created_at']}", normal_style))
+            story.append(Spacer(1, 1*cm))
+
+            # Блоки
+            for block_num in range(1, config.TOTAL_BLOCKS + 1):
+                block_key = f"block_{block_num}"
+                block_data = config.REPORT_BLOCKS[block_key]
+
+                story.append(Paragraph(block_data['title'].upper(), heading_style))
+                story.append(Spacer(1, 0.3*cm))
+
+                for i, element in enumerate(block_data['elements']):
+                    element_key = f"{block_key}_element_{i}"
+
+                    if element_key in self.answers:
+                        answer = self.answers[element_key]
+
+                        # Убираем HTML-теги из label
+                        label = element['label'].replace('<', '&lt;').replace('>', '&gt;')
+                        story.append(Paragraph(f"<b>{label}</b>", normal_style))
+
+                        if isinstance(answer, list):
+                            if answer:
+                                for item in answer:
+                                    item_text = item.replace('<', '&lt;').replace('>', '&gt;')
+                                    story.append(Paragraph(f"✓ {item_text}", normal_style))
+                            else:
+                                story.append(Paragraph("(нет отмеченных пунктов)", normal_style))
+
+                        elif isinstance(answer, dict):
+                            if answer.get('checkboxes'):
+                                for item in answer['checkboxes']:
+                                    item_text = item.replace('<', '&lt;').replace('>', '&gt;')
+                                    story.append(Paragraph(f"✓ {item_text}", normal_style))
+                            if answer.get('text'):
+                                text = answer['text'].replace('<', '&lt;').replace('>', '&gt;')
+                                story.append(Paragraph(f"Другое: {text}", normal_style))
+
+                        else:
+                            answer_text = str(answer).replace('<', '&lt;').replace('>', '&gt;')
+                            story.append(Paragraph(answer_text, normal_style))
+
+                        story.append(Spacer(1, 0.2*cm))
+
+                story.append(Spacer(1, 0.5*cm))
+
+            # Генерация PDF
+            doc.build(story)
+
+            return True, filename
+
+        except Exception as e:
+            return False, f"Ошибка при создании PDF: {str(e)}"
+
+    # ============================================================
+    # ЭКСПОРТ В DOCX
+    # ============================================================
+
+    def _save_report_docx(self):
+        """Сохраняет отчёт в DOCX формат."""
+        if not DOCX_AVAILABLE:
+            return False, "Библиотека python-docx не установлена. Установите: pip install python-docx"
+
+        try:
+            # Формирование имени файла
+            week_str = self.report_params['week'].replace(" ", "_").replace("(", "").replace(")", "").replace("-", "_")
+            filename = f"Отчёт_{week_str}_{self.report_params['year']}.docx"
+            filepath = os.path.join(config.REPORTS_FOLDER, filename)
+
+            # Создание документа
+            doc = Document()
+
+            # Заголовок
+            title = doc.add_heading('ЕЖЕНЕДЕЛЬНЫЙ ОТЧЁТ КОНТРОЛЯ ТЕХНОЛОГИИ', level=0)
+            title.alignment = WD_ALIGN_PARAGRAPH.CENTER
+
+            # Параметры отчёта
+            doc.add_paragraph(f"Период: {self.report_params['week']}")
+            doc.add_paragraph(f"Год: {self.report_params['year']}")
+            doc.add_paragraph(f"Месяц: {self.report_params['month']}")
+            doc.add_paragraph(f"Дата создания: {self.report_params['created_at']}")
+            doc.add_paragraph()  # Пустая строка
+
+            # Блоки
+            for block_num in range(1, config.TOTAL_BLOCKS + 1):
+                block_key = f"block_{block_num}"
+                block_data = config.REPORT_BLOCKS[block_key]
+
+                # Заголовок блока
+                doc.add_heading(block_data['title'].upper(), level=1)
+
+                for i, element in enumerate(block_data['elements']):
+                    element_key = f"{block_key}_element_{i}"
+
+                    if element_key in self.answers:
+                        answer = self.answers[element_key]
+
+                        # Label
+                        p = doc.add_paragraph()
+                        p.add_run(element['label']).bold = True
+
+                        if isinstance(answer, list):
+                            if answer:
+                                for item in answer:
+                                    doc.add_paragraph(f"✓ {item}", style='List Bullet')
+                            else:
+                                doc.add_paragraph("(нет отмеченных пунктов)")
+
+                        elif isinstance(answer, dict):
+                            if answer.get('checkboxes'):
+                                for item in answer['checkboxes']:
+                                    doc.add_paragraph(f"✓ {item}", style='List Bullet')
+                            if answer.get('text'):
+                                doc.add_paragraph(f"Другое: {answer['text']}")
+
+                        else:
+                            doc.add_paragraph(str(answer))
+
+                        doc.add_paragraph()  # Пустая строка
+
+            # Сохранение документа
+            doc.save(filepath)
+
+            return True, filename
+
+        except Exception as e:
+            return False, f"Ошибка при создании DOCX: {str(e)}"
