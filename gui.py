@@ -74,10 +74,11 @@ class ReportApp:
         self.clear_container()
 
         # Заголовок
-        ttk.Label(
+        tk.Label(
             self.main_container,
             text=configgui.MAIN_SCREEN_TITLE,
-            font=self.FONT_TITLE
+            font=self.FONT_TITLE,
+            fg=configgui.COLORS["label_fg"]
         ).pack(pady=15)
 
         # Контейнер для двух колонок
@@ -100,9 +101,11 @@ class ReportApp:
         readme_label = tk.Label(
             readme_frame,
             text=configgui.README_TEXT.strip(),
-            font=self.FONT_README,  # README шрифт 14
+            font=self.FONT_README,
             justify=tk.LEFT,
-            anchor='nw'
+            anchor='nw',
+            fg=configgui.COLORS["label_fg"],
+            bg=configgui.COLORS["bg"]
         )
         readme_label.pack(fill=tk.BOTH, expand=True)
 
@@ -154,30 +157,32 @@ class ReportApp:
         """Показывает экран выбора параметров отчёта."""
         self.clear_container()
 
-        ttk.Label(
+        tk.Label(
             self.main_container,
             text="Параметры отчёта",
-            font=self.FONT_TITLE
+            font=self.FONT_TITLE,
+            fg=configgui.COLORS["label_fg"]
         ).pack(pady=15)
 
-        form_frame = ttk.Frame(self.main_container, padding=20)
-        form_frame.pack(expand=True)
+        form_frame = tk.Frame(self.main_container)
+        form_frame.pack(expand=True, pady=20)
 
         # Год
-        ttk.Label(form_frame, text="Год:", font=self.FONT_MEDIUM).grid(
-            row=0, column=0, sticky="w", pady=5
+        tk.Label(form_frame, text="Год:", font=self.FONT_MEDIUM, fg=configgui.COLORS["label_fg"]).grid(
+            row=0, column=0, sticky="w", pady=5, padx=5
         )
         self.year_var = tk.StringVar(value=str(datetime.now().year))
-        year_entry = ttk.Entry(
-            form_frame, textvariable=self.year_var, font=self.FONT_MEDIUM, width=32
+        year_entry = tk.Entry(
+            form_frame, textvariable=self.year_var, font=self.FONT_MEDIUM, width=32,
+            bg=configgui.COLORS["text_bg"], fg=configgui.COLORS["text_fg"]
         )
         year_entry.grid(row=0, column=1, padx=self.padding["padx"], pady=5)
         self._update_weeks_timer = None
         self.year_var.trace_add("write", self._schedule_update_weeks)
 
         # Месяц
-        ttk.Label(form_frame, text="Месяц:", font=self.FONT_MEDIUM).grid(
-            row=1, column=0, sticky="w", pady=5
+        tk.Label(form_frame, text="Месяц:", font=self.FONT_MEDIUM, fg=configgui.COLORS["label_fg"]).grid(
+            row=1, column=0, sticky="w", pady=5, padx=5
         )
         self.month_var = tk.StringVar()
         month_combo = ttk.Combobox(
@@ -189,8 +194,8 @@ class ReportApp:
         month_combo.bind("<<ComboboxSelected>>", self._schedule_update_weeks)
 
         # Неделя
-        ttk.Label(form_frame, text="Неделя:", font=self.FONT_MEDIUM).grid(
-            row=2, column=0, sticky="w", pady=5
+        tk.Label(form_frame, text="Неделя:", font=self.FONT_MEDIUM, fg=configgui.COLORS["label_fg"]).grid(
+            row=2, column=0, sticky="w", pady=5, padx=5
         )
         self.week_var = tk.StringVar()
         self.week_combo = ttk.Combobox(
@@ -203,18 +208,24 @@ class ReportApp:
         self.root.after(1, self._update_weeks)
 
         # Кнопки
-        btn_frame = ttk.Frame(form_frame)
+        btn_frame = tk.Frame(form_frame)
         btn_frame.grid(row=3, column=0, columnspan=2, pady=15)
 
-        ttk.Button(
+        tk.Button(
             btn_frame, text="Начать заполнение",
-            command=self.start_report, padding=10
-        ).pack(side=tk.LEFT, padx=10)
+            font=self.FONT_MEDIUM,
+            bg=configgui.COLORS["button_bg"],
+            fg=configgui.COLORS["button_fg"],
+            command=self.start_report
+        ).pack(side=tk.LEFT, padx=10, pady=5)
 
-        ttk.Button(
+        tk.Button(
             btn_frame, text="Назад",
-            command=self.show_main_screen, padding=10
-        ).pack(side=tk.LEFT, padx=10)
+            font=self.FONT_MEDIUM,
+            bg=configgui.COLORS["button_bg"],
+            fg=configgui.COLORS["button_fg"],
+            command=self.show_main_screen
+        ).pack(side=tk.LEFT, padx=10, pady=5)
 
     def _schedule_update_weeks(self, *args):
         """Планирует обновление недель с задержкой для избежания множественных вызовов."""
@@ -330,18 +341,20 @@ class ReportApp:
 
         # Заголовок
         header = f"Отчёт: {self.logic.report_params['week']}"
-        ttk.Label(
+        tk.Label(
             self.main_container,
             text=header,
-            font=self.FONT_MEDIUM
+            font=self.FONT_MEDIUM,
+            fg=configgui.COLORS["label_fg"]
         ).pack(pady=5)
 
         # Прогресс
         progress_text = f"Блок {self.current_block} из {config.TOTAL_BLOCKS}: {block_data['title']}"
-        ttk.Label(
+        tk.Label(
             self.main_container,
             text=progress_text,
-            font=self.FONT_LARGE
+            font=self.FONT_LARGE,
+            fg=configgui.COLORS["label_fg"]
         ).pack(pady=3)
 
         # Canvas для прокрутки
@@ -661,31 +674,40 @@ class ReportApp:
 
         # Кнопка "Назад"
         if self.current_block > 1:
-            btn_back = ttk.Button(
+            btn_back = tk.Button(
                 btn_frame,
                 text="← Назад",
+                font=self.FONT_MEDIUM,
+                bg=configgui.COLORS["button_bg"],
+                fg=configgui.COLORS["button_fg"],
                 command=self.prev_block,
                 width=20
             )
-            btn_back.grid(row=0, column=0, sticky="e", padx=20)
+            btn_back.grid(row=0, column=0, sticky="e", padx=20, pady=5)
 
         # Кнопка "Далее" или "Сохранить"
         if self.current_block < config.TOTAL_BLOCKS:
-            btn_next = ttk.Button(
+            btn_next = tk.Button(
                 btn_frame,
                 text="Далее →",
+                font=self.FONT_MEDIUM,
+                bg=configgui.COLORS["button_bg"],
+                fg=configgui.COLORS["button_fg"],
                 command=self.next_block,
                 width=20
             )
-            btn_next.grid(row=0, column=1, sticky="w", padx=20)
+            btn_next.grid(row=0, column=1, sticky="w", padx=20, pady=5)
         else:
-            btn_save = ttk.Button(
+            btn_save = tk.Button(
                 btn_frame,
                 text="Сохранить отчёт",
+                font=self.FONT_MEDIUM,
+                bg=configgui.COLORS["button_bg"],
+                fg=configgui.COLORS["button_fg"],
                 command=self.save_report,
                 width=20
             )
-            btn_save.grid(row=0, column=1, sticky="w", padx=20)
+            btn_save.grid(row=0, column=1, sticky="w", padx=20, pady=5)
 
     def save_current_block_data(self):
         """Сохраняет данные текущего блока в логику."""
@@ -766,10 +788,11 @@ class ReportApp:
         dialog.geometry(f"+{x}+{y}")
 
         # Контент
-        ttk.Label(
+        tk.Label(
             dialog,
             text="Выберите формат для сохранения отчёта:",
-            font=self.FONT_MEDIUM
+            font=self.FONT_MEDIUM,
+            fg=configgui.COLORS["label_fg"]
         ).pack(pady=20)
 
         # Переменная для выбранного формата
@@ -784,7 +807,9 @@ class ReportApp:
             text="PDF (Portable Document Format)",
             variable=format_var,
             value="pdf",
-            font=self.FONT_LARGE
+            font=self.FONT_LARGE,
+            fg=configgui.COLORS["label_fg"],
+            bg=configgui.COLORS["bg"]
         ).pack(anchor="w", pady=5)
 
         tk.Radiobutton(
@@ -792,7 +817,9 @@ class ReportApp:
             text="DOCX (Microsoft Word)",
             variable=format_var,
             value="docx",
-            font=self.FONT_LARGE
+            font=self.FONT_LARGE,
+            fg=configgui.COLORS["label_fg"],
+            bg=configgui.COLORS["bg"]
         ).pack(anchor="w", pady=5)
 
         tk.Radiobutton(
@@ -800,7 +827,9 @@ class ReportApp:
             text="TXT (Текстовый файл)",
             variable=format_var,
             value="txt",
-            font=self.FONT_LARGE
+            font=self.FONT_LARGE,
+            fg=configgui.COLORS["label_fg"],
+            bg=configgui.COLORS["bg"]
         ).pack(anchor="w", pady=5)
 
         # Кнопки
@@ -815,19 +844,25 @@ class ReportApp:
         def on_cancel():
             dialog.destroy()
 
-        ttk.Button(
+        tk.Button(
             buttons_frame,
             text="Сохранить",
+            font=self.FONT_MEDIUM,
+            bg=configgui.COLORS["button_bg"],
+            fg=configgui.COLORS["button_fg"],
             command=on_save,
             width=15
-        ).pack(side=tk.LEFT, padx=10)
+        ).pack(side=tk.LEFT, padx=10, pady=5)
 
-        ttk.Button(
+        tk.Button(
             buttons_frame,
             text="Отмена",
+            font=self.FONT_MEDIUM,
+            bg=configgui.COLORS["button_bg"],
+            fg=configgui.COLORS["button_fg"],
             command=on_cancel,
             width=15
-        ).pack(side=tk.LEFT, padx=10)
+        ).pack(side=tk.LEFT, padx=10, pady=5)
 
         # Ждём закрытия диалога
         dialog.wait_window()
@@ -860,10 +895,11 @@ class ReportApp:
         self.clear_container()
 
         # Заголовок
-        ttk.Label(
+        tk.Label(
             self.main_container,
             text=configgui.ARCHIVE_TITLE,
-            font=self.FONT_TITLE
+            font=self.FONT_TITLE,
+            fg=configgui.COLORS["label_fg"]
         ).pack(pady=15)
 
         # Получаем список отчётов
@@ -871,22 +907,25 @@ class ReportApp:
 
         if not reports:
             # Если отчётов нет
-            empty_frame = ttk.Frame(self.main_container)
+            empty_frame = tk.Frame(self.main_container)
             empty_frame.pack(expand=True)
 
-            ttk.Label(
+            tk.Label(
                 empty_frame,
                 text="Архив пуст\n\nСоздайте первый отчёт!",
                 font=self.FONT_LARGE,
+                fg=configgui.COLORS["label_fg"],
                 justify=tk.CENTER
             ).pack(pady=40)
 
-            ttk.Button(
+            tk.Button(
                 empty_frame,
                 text="< Назад",
-                command=self.show_main_screen,
-                padding=10
-            ).pack()
+                font=self.FONT_MEDIUM,
+                bg=configgui.COLORS["button_bg"],
+                fg=configgui.COLORS["button_fg"],
+                command=self.show_main_screen
+            ).pack(pady=5)
             return
 
         # Фрейм для списка отчётов с прокруткой
@@ -917,6 +956,7 @@ class ReportApp:
             header_frame,
             text="Имя файла",
             font=self.FONT_MEDIUM,
+            fg=configgui.COLORS["label_fg"],
             width=40,
             anchor="w"
         ).grid(row=0, column=0, padx=10, pady=5, sticky="w")
@@ -925,6 +965,7 @@ class ReportApp:
             header_frame,
             text="Дата создания",
             font=self.FONT_MEDIUM,
+            fg=configgui.COLORS["label_fg"],
             width=20,
             anchor="w"
         ).grid(row=0, column=1, padx=10, pady=5)
@@ -933,6 +974,7 @@ class ReportApp:
             header_frame,
             text="Действия",
             font=self.FONT_MEDIUM,
+            fg=configgui.COLORS["label_fg"],
             width=20
         ).grid(row=0, column=2, padx=10, pady=5)
 
@@ -951,6 +993,7 @@ class ReportApp:
                 row_frame,
                 text=report['filename'],
                 font=self.FONT_SMALL,
+                fg=configgui.COLORS["label_fg"],
                 width=40,
                 anchor="w",
                 bg=row_frame["bg"]
@@ -961,6 +1004,7 @@ class ReportApp:
                 row_frame,
                 text=report['created'],
                 font=self.FONT_SMALL,
+                fg=configgui.COLORS["label_fg"],
                 width=20,
                 bg=row_frame["bg"]
             ).grid(row=0, column=1, padx=10, pady=8)
@@ -969,16 +1013,22 @@ class ReportApp:
             actions_frame = tk.Frame(row_frame, bg=row_frame["bg"])
             actions_frame.grid(row=0, column=2, padx=10, pady=5)
 
-            ttk.Button(
+            tk.Button(
                 actions_frame,
                 text="Просмотр",
+                font=self.FONT_SMALL,
+                bg=configgui.COLORS["button_bg"],
+                fg=configgui.COLORS["button_fg"],
                 command=lambda f=report['filename']: self.open_report(f),
                 width=10
             ).pack(side=tk.LEFT, padx=5)
 
-            ttk.Button(
+            tk.Button(
                 actions_frame,
                 text="Удалить",
+                font=self.FONT_SMALL,
+                bg=configgui.COLORS["button_bg"],
+                fg=configgui.COLORS["button_fg"],
                 command=lambda f=report['filename']: self.delete_report(f),
                 width=10
             ).pack(side=tk.LEFT, padx=5)
@@ -987,12 +1037,14 @@ class ReportApp:
         bottom_frame = tk.Frame(self.main_container)
         bottom_frame.pack(pady=15)
 
-        ttk.Button(
+        tk.Button(
             bottom_frame,
             text="< Назад",
-            command=self.show_main_screen,
-            padding=10
-        ).pack()
+            font=self.FONT_MEDIUM,
+            bg=configgui.COLORS["button_bg"],
+            fg=configgui.COLORS["button_fg"],
+            command=self.show_main_screen
+        ).pack(pady=5)
 
     def open_report(self, filename):
         """Открывает отчёт в системном просмотрщике."""
