@@ -292,9 +292,10 @@ class ReportLogic:
                 'CustomTitle',
                 parent=styles['Heading1'],
                 fontName=font_name,
-                fontSize=16,
+                fontSize=14,
                 alignment=TA_CENTER,
-                spaceAfter=20
+                spaceAfter=24,
+                leading=20
             )
 
             heading_style = ParagraphStyle(
@@ -302,15 +303,18 @@ class ReportLogic:
                 parent=styles['Heading2'],
                 fontName=font_name,
                 fontSize=14,
-                spaceAfter=10
+                spaceAfter=16,
+                spaceBefore=12,
+                leading=18
             )
 
             normal_style = ParagraphStyle(
                 'CustomNormal',
                 parent=styles['Normal'],
                 fontName=font_name,
-                fontSize=11,
-                spaceAfter=6
+                fontSize=14,
+                spaceAfter=10,
+                leading=18
             )
 
             # Контент
@@ -318,14 +322,14 @@ class ReportLogic:
 
             # Заголовок
             story.append(Paragraph("ЕЖЕНЕДЕЛЬНЫЙ ОТЧЁТ КОНТРОЛЯ ТЕХНОЛОГИИ", title_style))
-            story.append(Spacer(1, 0.5*cm))
+            story.append(Spacer(1, 0.8*cm))
 
             # Параметры отчёта
             story.append(Paragraph(f"Период: {self.report_params['week']}", normal_style))
             story.append(Paragraph(f"Год: {self.report_params['year']}", normal_style))
             story.append(Paragraph(f"Месяц: {self.report_params['month']}", normal_style))
             story.append(Paragraph(f"Дата создания: {self.report_params['created_at']}", normal_style))
-            story.append(Spacer(1, 1*cm))
+            story.append(Spacer(1, 1.2*cm))
 
             # Блоки
             for block_num in range(1, config.TOTAL_BLOCKS + 1):
@@ -333,7 +337,7 @@ class ReportLogic:
                 block_data = config.REPORT_BLOCKS[block_key]
 
                 story.append(Paragraph(block_data['title'].upper(), heading_style))
-                story.append(Spacer(1, 0.3*cm))
+                story.append(Spacer(1, 0.5*cm))
 
                 for i, element in enumerate(block_data['elements']):
                     element_key = f"{block_key}_element_{i}"
@@ -349,7 +353,7 @@ class ReportLogic:
                             if answer:
                                 for item in answer:
                                     item_text = item.replace('<', '&lt;').replace('>', '&gt;')
-                                    story.append(Paragraph(f"✓ {item_text}", normal_style))
+                                    story.append(Paragraph(f"☑ {item_text}", normal_style))
                             else:
                                 story.append(Paragraph("(нет отмеченных пунктов)", normal_style))
 
@@ -357,7 +361,7 @@ class ReportLogic:
                             if answer.get('checkboxes'):
                                 for item in answer['checkboxes']:
                                     item_text = item.replace('<', '&lt;').replace('>', '&gt;')
-                                    story.append(Paragraph(f"✓ {item_text}", normal_style))
+                                    story.append(Paragraph(f"☑ {item_text}", normal_style))
                             if answer.get('text'):
                                 text = answer['text'].replace('<', '&lt;').replace('>', '&gt;')
                                 story.append(Paragraph(f"Другое: {text}", normal_style))
@@ -366,9 +370,9 @@ class ReportLogic:
                             answer_text = str(answer).replace('<', '&lt;').replace('>', '&gt;')
                             story.append(Paragraph(answer_text, normal_style))
 
-                        story.append(Spacer(1, 0.2*cm))
+                        story.append(Spacer(1, 0.4*cm))
 
-                story.append(Spacer(1, 0.5*cm))
+                story.append(Spacer(1, 0.8*cm))
 
             # Генерация PDF
             doc.build(story)
