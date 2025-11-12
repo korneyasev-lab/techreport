@@ -6,7 +6,7 @@ from tkinter import ttk, messagebox, simpledialog
 import configgui
 from database import ConfigDatabase
 import config
-from question_type_dialog import QuestionTypeDialog
+from question_editor_full import QuestionEditorDialog
 
 
 class QuestionEditorWindow:
@@ -119,6 +119,16 @@ class QuestionEditorWindow:
 
         tk.Button(
             questions_btn_frame,
+            text="✏️ Редактировать вопрос",
+            font=self.FONT_MEDIUM,
+            command=self.edit_question,
+            bg=configgui.COLORS["button_bg"],
+            fg=configgui.COLORS["button_fg"],
+            height=2
+        ).pack(fill=tk.X, pady=5)
+
+        tk.Button(
+            questions_btn_frame,
             text="➕ Добавить вопрос",
             font=self.FONT_SMALL,
             command=self.add_question,
@@ -156,38 +166,9 @@ class QuestionEditorWindow:
             fg=configgui.COLORS["button_fg"]
         ).pack(side=tk.LEFT, fill=tk.X, expand=True, padx=2)
 
-        # ========== ПРАВАЯ ПАНЕЛЬ: РЕДАКТИРОВАНИЕ ВОПРОСА ==========
-        right_frame = tk.LabelFrame(main_frame, text="✏️ РЕДАКТОР ВОПРОСА", font=self.FONT_MEDIUM, padx=10, pady=10)
-        right_frame.grid(row=0, column=2, sticky="nsew", padx=5)
-
-        # Скроллируемая область
-        canvas = tk.Canvas(right_frame, bg=configgui.COLORS["bg"])
-        scrollbar = tk.Scrollbar(right_frame, orient="vertical", command=canvas.yview)
-        self.editor_frame = tk.Frame(canvas, bg=configgui.COLORS["bg"])
-
-        self.editor_frame.bind(
-            "<Configure>",
-            lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
-        )
-
-        canvas.create_window((0, 0), window=self.editor_frame, anchor="nw")
-        canvas.configure(yscrollcommand=scrollbar.set)
-
-        canvas.pack(side="left", fill="both", expand=True)
-        scrollbar.pack(side="right", fill="y")
-
-        # Изначально пусто
-        tk.Label(
-            self.editor_frame,
-            text="Выберите вопрос для редактирования",
-            font=self.FONT_MEDIUM,
-            fg="gray"
-        ).pack(pady=50)
-
-        # Настройка grid весов
+        # Настройка grid весов (только две колонки)
         main_frame.columnconfigure(0, weight=1)
-        main_frame.columnconfigure(1, weight=1)
-        main_frame.columnconfigure(2, weight=2)
+        main_frame.columnconfigure(1, weight=2)
         main_frame.rowconfigure(0, weight=1)
 
         # ========== НИЖНЯЯ ПАНЕЛЬ: КНОПКИ ==========
@@ -224,9 +205,8 @@ class QuestionEditorWindow:
         for block in self.blocks:
             self.blocks_listbox.insert(tk.END, block['title'])
 
-        # Очистка вопросов и редактора
+        # Очистка вопросов
         self.questions_listbox.delete(0, tk.END)
-        self.clear_editor()
 
     def load_questions(self, block_id):
         """Загружает список вопросов для выбранного раздела."""
@@ -236,192 +216,6 @@ class QuestionEditorWindow:
         for i, question in enumerate(self.questions):
             display_text = f"{i+1}. {question['label'][:50]}..."
             self.questions_listbox.insert(tk.END, display_text)
-
-        self.clear_editor()
-
-    def clear_editor(self):
-        """Очищает панель редактирования вопроса."""
-        for widget in self.editor_frame.winfo_children():
-            widget.destroy()
-
-        tk.Label(
-            self.editor_frame,
-            text="Выберите вопрос для редактирования",
-            font=self.FONT_MEDIUM,
-            fg="gray"
-        ).pack(pady=50)
-
-    def load_question_editor(self, question_id):
-        """Загружает форму редактирования вопроса."""
-        # Очистка
-        for widget in self.editor_frame.winfo_children():
-            widget.destroy()
-
-        # Получаем данные вопроса
-        question = next((q for q in self.questions if q['id'] == question_id), None)
-        if not question:
-            return
-
-        # Тип вопроса
-        tk.Label(
-            self.editor_frame,
-            text="Тип вопроса:",
-            font=self.FONT_MEDIUM,
-            anchor='w'
-        ).pack(fill=tk.X, pady=5)
-
-        self.question_type_var = tk.StringVar(value=question['question_type'])
-
-        # Рамка для отображения текущего типа и кнопки
-        type_frame = tk.Frame(self.editor_frame)
-        type_frame.pack(fill=tk.X, pady=5)
-
-        # Отображение текущего типа
-        type_name = config.ELEMENT_TYPES.get(question['question_type'], question['question_type'])
-        self.type_label = tk.Label(
-            type_frame,
-            text=f"→ {type_name}",
-            font=self.FONT_MEDIUM,
-            fg=configgui.COLORS["label_fg"],
-            anchor='w'
-        )
-        self.type_label.pack(side=tk.LEFT, fill=tk.X, expand=True)
-
-        # Кнопка выбора типа
-        tk.Button(
-            type_frame,
-            text="⚙ Выбрать тип",
-            font=self.FONT_MEDIUM,
-            bg=configgui.COLORS["button_bg"],
-            fg=configgui.COLORS["button_fg"],
-            command=lambda: self.open_type_dialog(question_id),
-            width=15
-        ).pack(side=tk.RIGHT, padx=5)
-
-        # Текст вопроса
-        tk.Label(
-            self.editor_frame,
-            text="Текст вопроса:",
-            font=self.FONT_MEDIUM,
-            anchor='w'
-        ).pack(fill=tk.X, pady=5)
-
-        self.question_label_text = tk.Text(
-            self.editor_frame,
-            height=3,
-            font=self.FONT_SMALL,
-            bg=configgui.COLORS["text_bg"],
-            fg=configgui.COLORS["text_fg"]
-        )
-        self.question_label_text.pack(fill=tk.X, pady=5)
-        self.question_label_text.insert("1.0", question['label'])
-
-        # Дополнительные поля для текстовых полей
-        self.height_var = tk.StringVar(value=str(question['height'] or ''))
-        self.placeholder_var = tk.StringVar(value=question['placeholder'] or '')
-
-        if 'text' in question['question_type']:
-            tk.Label(
-                self.editor_frame,
-                text="Высота поля (строк):",
-                font=self.FONT_SMALL
-            ).pack(fill=tk.X, pady=2)
-
-            tk.Entry(
-                self.editor_frame,
-                textvariable=self.height_var,
-                font=self.FONT_SMALL,
-                bg=configgui.COLORS["text_bg"],
-                fg=configgui.COLORS["text_fg"]
-            ).pack(fill=tk.X, pady=2)
-
-            tk.Label(
-                self.editor_frame,
-                text="Placeholder (подсказка):",
-                font=self.FONT_SMALL
-            ).pack(fill=tk.X, pady=2)
-
-            tk.Entry(
-                self.editor_frame,
-                textvariable=self.placeholder_var,
-                font=self.FONT_SMALL,
-                bg=configgui.COLORS["text_bg"],
-                fg=configgui.COLORS["text_fg"]
-            ).pack(fill=tk.X, pady=2)
-
-        # Варианты ответов (для чекбоксов)
-        if 'checkbox' in question['question_type']:
-            tk.Label(
-                self.editor_frame,
-                text="Варианты ответов:",
-                font=self.FONT_MEDIUM,
-                anchor='w'
-            ).pack(fill=tk.X, pady=10)
-
-            # Список вариантов
-            self.options_frame = tk.Frame(self.editor_frame)
-            self.options_frame.pack(fill=tk.BOTH, expand=True, pady=5)
-
-            self.load_options(question_id)
-
-            # Добавление нового варианта
-            add_option_frame = tk.Frame(self.editor_frame)
-            add_option_frame.pack(fill=tk.X, pady=5)
-
-            self.new_option_var = tk.StringVar()
-            tk.Entry(
-                add_option_frame,
-                textvariable=self.new_option_var,
-                font=self.FONT_SMALL,
-                bg=configgui.COLORS["text_bg"],
-                fg=configgui.COLORS["text_fg"]
-            ).pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(0, 5))
-
-            tk.Button(
-                add_option_frame,
-                text="➕ Добавить вариант",
-                font=self.FONT_SMALL,
-                command=lambda: self.add_option(question_id),
-                bg=configgui.COLORS["button_bg"],
-                fg=configgui.COLORS["button_fg"]
-            ).pack(side=tk.LEFT)
-
-        # Кнопка сохранения
-        tk.Button(
-            self.editor_frame,
-            text="💾 Сохранить вопрос",
-            font=self.FONT_MEDIUM,
-            command=lambda: self.save_question(question_id),
-            bg=configgui.COLORS["button_bg"],
-            fg=configgui.COLORS["button_fg"]
-        ).pack(fill=tk.X, pady=20)
-
-    def load_options(self, question_id):
-        """Загружает список вариантов ответов."""
-        for widget in self.options_frame.winfo_children():
-            widget.destroy()
-
-        options = self.db.get_question_options(question_id)
-
-        for option in options:
-            option_row = tk.Frame(self.options_frame)
-            option_row.pack(fill=tk.X, pady=2)
-
-            tk.Label(
-                option_row,
-                text=f"☑ {option['option_text']}",
-                font=self.FONT_SMALL,
-                anchor='w'
-            ).pack(side=tk.LEFT, fill=tk.X, expand=True)
-
-            tk.Button(
-                option_row,
-                text="🗑️",
-                font=self.FONT_SMALL,
-                command=lambda opt_id=option['id']: self.delete_option(opt_id, question_id),
-                bg=configgui.COLORS["button_bg"],
-                fg=configgui.COLORS["button_fg"]
-            ).pack(side=tk.RIGHT)
 
     # ============================================================
     # ОБРАБОТЧИКИ СОБЫТИЙ
@@ -441,39 +235,20 @@ class QuestionEditorWindow:
         if selection:
             index = selection[0]
             self.selected_question_id = self.questions[index]['id']
-            self.load_question_editor(self.selected_question_id)
 
-    def open_type_dialog(self, question_id):
-        """Открывает диалог выбора типа вопроса."""
-        # Получаем текущие данные вопроса
-        question = next((q for q in self.questions if q['id'] == question_id), None)
-        if not question:
+    def edit_question(self):
+        """Открывает полноценный редактор вопроса в отдельном окне."""
+        if not self.selected_question_id:
+            messagebox.showwarning("Ошибка", "Выберите вопрос для редактирования!", parent=self.window)
             return
 
-        # Получаем варианты ответов для примера
-        options = self.db.get_question_options(question_id)
-        items = [opt['option_text'] for opt in options] if options else []
+        # Открываем диалог редактора
+        dialog = QuestionEditorDialog(self.window, self.selected_question_id, self.db)
+        result = dialog.show()
 
-        # Открываем диалог
-        dialog = QuestionTypeDialog(
-            self.window,
-            current_type=question['question_type'],
-            current_label=question['label'],
-            current_items=items
-        )
-        new_type = dialog.show()
-
-        # Если пользователь выбрал новый тип
-        if new_type and new_type != question['question_type']:
-            self.question_type_var.set(new_type)
-            # Обновляем отображение типа
-            type_name = config.ELEMENT_TYPES.get(new_type, new_type)
-            self.type_label.config(text=f"→ {type_name}")
-            messagebox.showinfo(
-                "Тип изменён",
-                f"Тип вопроса изменён на: {type_name}\n\nНе забудьте сохранить вопрос!",
-                parent=self.window
-            )
+        # Если успешно сохранено - обновляем список
+        if result:
+            self.load_questions(self.selected_block_id)
 
     # ============================================================
     # ДЕЙСТВИЯ С РАЗДЕЛАМИ
@@ -574,41 +349,6 @@ class QuestionEditorWindow:
 
         self.db.move_question_down(self.selected_question_id)
         self.load_questions(self.selected_block_id)
-
-    def save_question(self, question_id):
-        """Сохраняет изменения вопроса."""
-        label = self.question_label_text.get("1.0", tk.END).strip()
-        question_type = self.question_type_var.get()
-
-        height = None
-        if self.height_var.get():
-            try:
-                height = int(self.height_var.get())
-            except ValueError:
-                pass
-
-        placeholder = self.placeholder_var.get() if self.placeholder_var.get() else None
-
-        self.db.update_question(question_id, label, question_type, height, placeholder)
-        self.load_questions(self.selected_block_id)
-        messagebox.showinfo("Успех", "Вопрос сохранён!", parent=self.window)
-
-    # ============================================================
-    # ДЕЙСТВИЯ С ВАРИАНТАМИ ОТВЕТОВ
-    # ============================================================
-
-    def add_option(self, question_id):
-        """Добавляет новый вариант ответа."""
-        option_text = self.new_option_var.get().strip()
-        if option_text:
-            self.db.add_option(question_id, option_text)
-            self.new_option_var.set('')
-            self.load_options(question_id)
-
-    def delete_option(self, option_id, question_id):
-        """Удаляет вариант ответа."""
-        self.db.delete_option(option_id)
-        self.load_options(question_id)
 
     # ============================================================
     # СБРОС К УМОЛЧАНИЯМ
