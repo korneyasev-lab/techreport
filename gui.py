@@ -355,6 +355,20 @@ class ReportApp:
         block_key = f"block_{self.current_block}"
         block_data = self.report_blocks[block_key]
 
+        # Кнопка возврата в главное меню
+        top_frame = tk.Frame(self.main_container)
+        top_frame.pack(fill=tk.X, pady=5)
+
+        tk.Button(
+            top_frame,
+            text="← В главное меню",
+            font=self.FONT_MEDIUM,
+            bg=configgui.COLORS["button_bg"],
+            fg=configgui.COLORS["button_fg"],
+            command=self.confirm_exit_to_main,
+            width=20
+        ).pack(side=tk.LEFT, padx=20)
+
         # Заголовок
         header = f"Отчёт: {self.logic.report_params['week']}"
         tk.Label(
@@ -771,6 +785,15 @@ class ReportApp:
         self.save_current_block_data()
         self.current_block += 1
         self.show_block_screen()
+
+    def confirm_exit_to_main(self):
+        """Подтверждение выхода в главное меню."""
+        confirm = messagebox.askyesno(
+            "Выход в главное меню",
+            "Вы уверены, что хотите вернуться в главное меню?\n\nНесохранённые данные будут потеряны."
+        )
+        if confirm:
+            self.show_main_screen()
 
     def save_report(self):
         """Сохраняет отчёт через логику с валидацией."""
