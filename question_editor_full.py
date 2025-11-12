@@ -124,10 +124,7 @@ class QuestionEditorDialog:
                 variable=self.selected_type,
                 value=type_key,
                 font=self.FONT_LARGE,
-                command=self.update_preview,
-                bg=configgui.COLORS["bg"],
-                fg=configgui.COLORS["label_fg"],
-                activebackground=configgui.COLORS["bg"]
+                command=self.update_preview
             )
             rb.pack(anchor='w')
 
@@ -150,7 +147,7 @@ class QuestionEditorDialog:
         right_frame.grid(row=0, column=1, sticky="nsew", padx=10)
 
         # Контейнер для примера
-        self.preview_frame = tk.Frame(right_frame, bg=configgui.COLORS["bg"])
+        self.preview_frame = tk.Frame(right_frame)
         self.preview_frame.pack(fill=tk.BOTH, expand=True)
 
         # Настройка весов grid
@@ -358,10 +355,7 @@ class QuestionEditorDialog:
                 self.preview_frame,
                 text=item,
                 variable=var,
-                font=self.FONT_MEDIUM,
-                bg=configgui.COLORS["bg"],
-                fg=configgui.COLORS["label_fg"],
-                activebackground=configgui.COLORS["bg"]
+                font=self.FONT_MEDIUM
             )
             cb.pack(anchor='w', pady=3)
 
@@ -382,10 +376,7 @@ class QuestionEditorDialog:
                     self.preview_frame,
                     text=item,
                     variable=var,
-                    font=self.FONT_MEDIUM,
-                    bg=configgui.COLORS["bg"],
-                    fg=configgui.COLORS["label_fg"],
-                    activebackground=configgui.COLORS["bg"]
+                    font=self.FONT_MEDIUM
                 )
                 cb.pack(anchor='w', pady=3)
 
@@ -446,7 +437,7 @@ class QuestionEditorDialog:
         """Показывает пример выбора Да/Нет."""
         var = tk.StringVar(value="Да")
 
-        rb_frame = tk.Frame(self.preview_frame, bg=configgui.COLORS["bg"])
+        rb_frame = tk.Frame(self.preview_frame)
         rb_frame.pack(anchor='w', pady=10)
 
         tk.Radiobutton(
@@ -454,10 +445,7 @@ class QuestionEditorDialog:
             text="Да",
             variable=var,
             value="Да",
-            font=self.FONT_MEDIUM,
-            bg=configgui.COLORS["bg"],
-            fg=configgui.COLORS["label_fg"],
-            activebackground=configgui.COLORS["bg"]
+            font=self.FONT_MEDIUM
         ).pack(side=tk.LEFT, padx=10)
 
         tk.Radiobutton(
@@ -465,10 +453,7 @@ class QuestionEditorDialog:
             text="Нет",
             variable=var,
             value="Нет",
-            font=self.FONT_MEDIUM,
-            bg=configgui.COLORS["bg"],
-            fg=configgui.COLORS["label_fg"],
-            activebackground=configgui.COLORS["bg"]
+            font=self.FONT_MEDIUM
         ).pack(side=tk.LEFT, padx=10)
 
     def save_question(self):

@@ -85,10 +85,7 @@ class QuestionTypeDialog:
                 variable=self.selected_type,
                 value=type_key,
                 font=self.FONT_LARGE,
-                command=self.update_preview,
-                bg=configgui.COLORS["bg"],
-                fg=configgui.COLORS["label_fg"],
-                activebackground=configgui.COLORS["bg"]
+                command=self.update_preview
             )
             rb.pack(anchor='w')
 
@@ -200,10 +197,7 @@ class QuestionTypeDialog:
                 self.preview_frame,
                 text=item,
                 variable=var,
-                font=self.FONT_MEDIUM,
-                bg=configgui.COLORS["bg"],
-                fg=configgui.COLORS["label_fg"],
-                activebackground=configgui.COLORS["bg"]
+                font=self.FONT_MEDIUM
             )
             cb.pack(anchor='w', pady=3)
 
@@ -220,10 +214,7 @@ class QuestionTypeDialog:
                 self.preview_frame,
                 text=item,
                 variable=var,
-                font=self.FONT_MEDIUM,
-                bg=configgui.COLORS["bg"],
-                fg=configgui.COLORS["label_fg"],
-                activebackground=configgui.COLORS["bg"]
+                font=self.FONT_MEDIUM
             )
             cb.pack(anchor='w', pady=3)
 
@@ -284,7 +275,7 @@ class QuestionTypeDialog:
         """Показывает пример выбора Да/Нет."""
         var = tk.StringVar(value="Да")
 
-        rb_frame = tk.Frame(self.preview_frame, bg=configgui.COLORS["bg"])
+        rb_frame = tk.Frame(self.preview_frame)
         rb_frame.pack(anchor='w', pady=10)
 
         tk.Radiobutton(
@@ -292,10 +283,7 @@ class QuestionTypeDialog:
             text="Да",
             variable=var,
             value="Да",
-            font=self.FONT_MEDIUM,
-            bg=configgui.COLORS["bg"],
-            fg=configgui.COLORS["label_fg"],
-            activebackground=configgui.COLORS["bg"]
+            font=self.FONT_MEDIUM
         ).pack(side=tk.LEFT, padx=10)
 
         tk.Radiobutton(
@@ -303,10 +291,7 @@ class QuestionTypeDialog:
             text="Нет",
             variable=var,
             value="Нет",
-            font=self.FONT_MEDIUM,
-            bg=configgui.COLORS["bg"],
-            fg=configgui.COLORS["label_fg"],
-            activebackground=configgui.COLORS["bg"]
+            font=self.FONT_MEDIUM
         ).pack(side=tk.LEFT, padx=10)
 
     def on_select(self):
