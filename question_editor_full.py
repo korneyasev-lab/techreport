@@ -23,7 +23,16 @@ class QuestionEditorDialog:
         # Создаём модальное окно
         self.dialog = tk.Toplevel(parent)
         self.dialog.title("Редактор вопроса")
-        self.dialog.geometry("1400x900")
+
+        # Получаем размер экрана
+        screen_width = self.dialog.winfo_screenwidth()
+        screen_height = self.dialog.winfo_screenheight()
+
+        # Размер окна - 90% экрана, но не больше 1400x750
+        width = min(int(screen_width * 0.9), 1400)
+        height = min(int(screen_height * 0.85), 750)
+
+        self.dialog.geometry(f"{width}x{height}")
         self.dialog.transient(parent)
         self.dialog.grab_set()
 
@@ -38,9 +47,9 @@ class QuestionEditorDialog:
 
         # Центрируем окно
         self.dialog.update_idletasks()
-        x = (self.dialog.winfo_screenwidth() // 2) - (1400 // 2)
-        y = (self.dialog.winfo_screenheight() // 2) - (900 // 2)
-        self.dialog.geometry(f"1400x900+{x}+{y}")
+        x = (screen_width // 2) - (width // 2)
+        y = (screen_height // 2) - (height // 2)
+        self.dialog.geometry(f"{width}x{height}+{x}+{y}")
 
     def load_question_data(self):
         """Загружает данные вопроса из БД."""
@@ -334,9 +343,17 @@ class QuestionEditorDialog:
 
     def show_checkbox_example(self):
         """Показывает пример группы чекбоксов."""
-        items = self.options_list if self.options_list else ["Вариант 1", "Вариант 2", "Вариант 3"]
+        # Используем реальные варианты из списка ниже
+        if not self.options_list:
+            tk.Label(
+                self.preview_frame,
+                text="⚠ Добавьте варианты ответов внизу",
+                font=self.FONT_SMALL,
+                fg="orange"
+            ).pack(pady=20)
+            return
 
-        for item in items:
+        for item in self.options_list:
             var = tk.BooleanVar()
             cb = tk.Checkbutton(
                 self.preview_frame,
@@ -352,21 +369,28 @@ class QuestionEditorDialog:
 
     def show_checkbox_with_text_example(self):
         """Показывает пример чекбоксов + текстовое поле."""
-        items = self.options_list if self.options_list else ["Вариант 1", "Вариант 2"]
-
-        for item in items:
-            var = tk.BooleanVar()
-            cb = tk.Checkbutton(
+        # Используем реальные варианты
+        if not self.options_list:
+            tk.Label(
                 self.preview_frame,
-                text=item,
-                variable=var,
-                font=self.FONT_MEDIUM,
-                bg=configgui.COLORS["bg"],
-                fg=configgui.COLORS["label_fg"],
-                activebackground=configgui.COLORS["bg"],
-                selectcolor=configgui.COLORS["text_bg"]
-            )
-            cb.pack(anchor='w', pady=3)
+                text="⚠ Добавьте варианты ответов внизу",
+                font=self.FONT_SMALL,
+                fg="orange"
+            ).pack(pady=10)
+        else:
+            for item in self.options_list:
+                var = tk.BooleanVar()
+                cb = tk.Checkbutton(
+                    self.preview_frame,
+                    text=item,
+                    variable=var,
+                    font=self.FONT_MEDIUM,
+                    bg=configgui.COLORS["bg"],
+                    fg=configgui.COLORS["label_fg"],
+                    activebackground=configgui.COLORS["bg"],
+                    selectcolor=configgui.COLORS["text_bg"]
+                )
+                cb.pack(anchor='w', pady=3)
 
         tk.Label(
             self.preview_frame,
