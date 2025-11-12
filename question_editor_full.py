@@ -87,8 +87,9 @@ class QuestionEditorDialog:
             self.dialog,
             text="✏️ РЕДАКТОР ВОПРОСА",
             font=self.FONT_TITLE,
-            fg=configgui.COLORS["label_fg"]
-        ).pack(pady=10)
+            fg=configgui.COLORS["label_fg"],
+            bg=configgui.COLORS["title_bg"]
+        ).pack(fill=tk.X, pady=10, ipady=10)
 
         # Верхняя часть: выбор типа и пример
         top_frame = tk.Frame(self.dialog)

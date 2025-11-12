@@ -48,8 +48,9 @@ class QuestionTypeDialog:
             self.dialog,
             text="ВЫБОР ТИПА ВОПРОСА",
             font=self.FONT_TITLE,
-            fg=configgui.COLORS["label_fg"]
-        ).pack(pady=15)
+            fg=configgui.COLORS["label_fg"],
+            bg=configgui.COLORS["title_bg"]
+        ).pack(fill=tk.X, pady=15, ipady=10)
 
         # Основной контейнер с двумя панелями
         main_frame = tk.Frame(self.dialog)

@@ -83,8 +83,9 @@ class ReportApp:
             self.main_container,
             text=configgui.MAIN_SCREEN_TITLE,
             font=self.FONT_TITLE,
-            fg=configgui.COLORS["label_fg"]
-        ).pack(pady=15)
+            fg=configgui.COLORS["label_fg"],
+            bg=configgui.COLORS["title_bg"]
+        ).pack(fill=tk.X, pady=15, ipady=10)
 
         # Контейнер для двух колонок
         content_frame = tk.Frame(self.main_container)
@@ -177,8 +178,9 @@ class ReportApp:
             self.main_container,
             text="Параметры отчёта",
             font=self.FONT_TITLE,
-            fg=configgui.COLORS["label_fg"]
-        ).pack(pady=15)
+            fg=configgui.COLORS["label_fg"],
+            bg=configgui.COLORS["title_bg"]
+        ).pack(fill=tk.X, pady=15, ipady=10)
 
         form_frame = tk.Frame(self.main_container)
         form_frame.pack(expand=True, pady=20)
@@ -938,8 +940,9 @@ class ReportApp:
             self.main_container,
             text=configgui.ARCHIVE_TITLE,
             font=self.FONT_TITLE,
-            fg=configgui.COLORS["label_fg"]
-        ).pack(pady=15)
+            fg=configgui.COLORS["label_fg"],
+            bg=configgui.COLORS["title_bg"]
+        ).pack(fill=tk.X, pady=15, ipady=10)
 
         # Получаем список отчётов
         reports = self.logic.get_all_reports()

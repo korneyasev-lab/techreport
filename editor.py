@@ -43,8 +43,9 @@ class QuestionEditorWindow:
             self.window,
             text="⚙️ РЕДАКТОР СТРУКТУРЫ ОТЧЁТА",
             font=self.FONT_TITLE,
-            fg=configgui.COLORS["label_fg"]
-        ).pack(pady=10)
+            fg=configgui.COLORS["label_fg"],
+            bg=configgui.COLORS["title_bg"]
+        ).pack(fill=tk.X, pady=10, ipady=10)
 
         # Основной контейнер с тремя панелями
         main_frame = tk.Frame(self.window)
