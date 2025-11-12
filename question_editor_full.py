@@ -23,6 +23,7 @@ class QuestionEditorDialog:
         # Создаём модальное окно
         self.dialog = tk.Toplevel(parent)
         self.dialog.title("Редактор вопроса")
+        self.dialog.configure(bg=configgui.COLORS["bg"])
 
         # Получаем размер экрана
         screen_width = self.dialog.winfo_screenwidth()
@@ -92,7 +93,7 @@ class QuestionEditorDialog:
         ).pack(fill=tk.X, pady=10, ipady=10)
 
         # Верхняя часть: выбор типа и пример
-        top_frame = tk.Frame(self.dialog)
+        top_frame = tk.Frame(self.dialog, bg=configgui.COLORS["bg"])
         top_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=10)
 
         # ========== ЛЕВАЯ ПАНЕЛЬ: ВЫБОР ТИПА ==========
@@ -101,7 +102,9 @@ class QuestionEditorDialog:
             text="ВЫБЕРИТЕ ТИП (16 шрифт):",
             font=self.FONT_LARGE,
             padx=20,
-            pady=20
+            pady=20,
+            bg=configgui.COLORS["bg"],
+            fg=configgui.COLORS["label_fg"]
         )
         left_frame.grid(row=0, column=0, sticky="nsew", padx=10)
 
@@ -116,7 +119,7 @@ class QuestionEditorDialog:
         ]
 
         for i, (type_key, label, description) in enumerate(types_info):
-            rb_frame = tk.Frame(left_frame)
+            rb_frame = tk.Frame(left_frame, bg=configgui.COLORS["bg"])
             rb_frame.pack(fill=tk.X, pady=8)
 
             rb = tk.Radiobutton(
@@ -134,6 +137,7 @@ class QuestionEditorDialog:
                 text=description,
                 font=self.FONT_SMALL,
                 fg="gray",
+                bg=configgui.COLORS["bg"],
                 justify=tk.LEFT
             ).pack(anchor='w', padx=25)
 
@@ -143,12 +147,14 @@ class QuestionEditorDialog:
             text="ПОПРОБУЙТЕ (как будет в отчёте):",
             font=self.FONT_LARGE,
             padx=20,
-            pady=20
+            pady=20,
+            bg=configgui.COLORS["bg"],
+            fg=configgui.COLORS["label_fg"]
         )
         right_frame.grid(row=0, column=1, sticky="nsew", padx=10)
 
         # Контейнер для примера
-        self.preview_frame = tk.Frame(right_frame)
+        self.preview_frame = tk.Frame(right_frame, bg=configgui.COLORS["bg"])
         self.preview_frame.pack(fill=tk.BOTH, expand=True)
 
         # Настройка весов grid
@@ -162,7 +168,9 @@ class QuestionEditorDialog:
             text="Настройки вопроса:",
             font=self.FONT_LARGE,
             padx=20,
-            pady=15
+            pady=15,
+            bg=configgui.COLORS["bg"],
+            fg=configgui.COLORS["label_fg"]
         )
         bottom_frame.pack(fill=tk.BOTH, padx=20, pady=10)
 
@@ -172,6 +180,7 @@ class QuestionEditorDialog:
             text="Текст вопроса (14 шрифт):",
             font=self.FONT_MEDIUM,
             fg=configgui.COLORS["label_fg"],
+            bg=configgui.COLORS["bg"],
             anchor='w'
         ).pack(fill=tk.X, pady=5)
 
@@ -187,13 +196,13 @@ class QuestionEditorDialog:
         self.label_text.insert("1.0", self.question_label)
 
         # Варианты ответов (показываем только для чекбоксов)
-        self.options_container = tk.Frame(bottom_frame)
+        self.options_container = tk.Frame(bottom_frame, bg=configgui.COLORS["bg"])
         self.options_container.pack(fill=tk.BOTH, expand=True, pady=10)
 
         self.show_options_editor()
 
         # ========== КНОПКИ ==========
-        btn_frame = tk.Frame(self.dialog)
+        btn_frame = tk.Frame(self.dialog, bg=configgui.COLORS["bg"])
         btn_frame.pack(fill=tk.X, padx=20, pady=15)
 
         tk.Button(
@@ -234,6 +243,7 @@ class QuestionEditorDialog:
                 text="Варианты ответов (только для чекбоксов):",
                 font=self.FONT_MEDIUM,
                 fg=configgui.COLORS["label_fg"],
+                bg=configgui.COLORS["bg"],
                 anchor='w'
             ).pack(fill=tk.X, pady=5)
 
@@ -251,7 +261,7 @@ class QuestionEditorDialog:
                 self.options_listbox.insert(tk.END, f"• {option}")
 
             # Кнопки управления вариантами
-            btn_frame = tk.Frame(self.options_container)
+            btn_frame = tk.Frame(self.options_container, bg=configgui.COLORS["bg"])
             btn_frame.pack(fill=tk.X, pady=5)
 
             self.new_option_entry = tk.Entry(

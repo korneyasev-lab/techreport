@@ -20,6 +20,7 @@ class QuestionEditorWindow:
         self.window = tk.Toplevel(parent)
         self.window.title("Редактор структуры отчёта")
         self.window.geometry("1400x800")
+        self.window.configure(bg=configgui.COLORS["bg"])
 
         # Адаптация настроек
         fonts, padding = configgui.get_settings()
@@ -48,11 +49,11 @@ class QuestionEditorWindow:
         ).pack(fill=tk.X, pady=10, ipady=10)
 
         # Основной контейнер с тремя панелями
-        main_frame = tk.Frame(self.window)
+        main_frame = tk.Frame(self.window, bg=configgui.COLORS["bg"])
         main_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=10)
 
         # ========== ЛЕВАЯ ПАНЕЛЬ: РАЗДЕЛЫ ==========
-        left_frame = tk.LabelFrame(main_frame, text="📋 РАЗДЕЛЫ", font=self.FONT_MEDIUM, padx=10, pady=10)
+        left_frame = tk.LabelFrame(main_frame, text="📋 РАЗДЕЛЫ", font=self.FONT_MEDIUM, padx=10, pady=10, bg=configgui.COLORS["bg"], fg=configgui.COLORS["label_fg"])
         left_frame.grid(row=0, column=0, sticky="nsew", padx=5)
 
         # Список разделов
@@ -68,7 +69,7 @@ class QuestionEditorWindow:
         self.blocks_listbox.bind('<<ListboxSelect>>', self.on_block_selected)
 
         # Кнопки управления разделами
-        blocks_btn_frame = tk.Frame(left_frame)
+        blocks_btn_frame = tk.Frame(left_frame, bg=configgui.COLORS["bg"])
         blocks_btn_frame.pack(fill=tk.X, pady=5)
 
         tk.Button(
@@ -99,7 +100,7 @@ class QuestionEditorWindow:
         ).pack(fill=tk.X, pady=2)
 
         # ========== ЦЕНТРАЛЬНАЯ ПАНЕЛЬ: ВОПРОСЫ ==========
-        center_frame = tk.LabelFrame(main_frame, text="❓ ВОПРОСЫ РАЗДЕЛА", font=self.FONT_MEDIUM, padx=10, pady=10)
+        center_frame = tk.LabelFrame(main_frame, text="❓ ВОПРОСЫ РАЗДЕЛА", font=self.FONT_MEDIUM, padx=10, pady=10, bg=configgui.COLORS["bg"], fg=configgui.COLORS["label_fg"])
         center_frame.grid(row=0, column=1, sticky="nsew", padx=5)
 
         # Список вопросов
@@ -115,7 +116,7 @@ class QuestionEditorWindow:
         self.questions_listbox.bind('<<ListboxSelect>>', self.on_question_selected)
 
         # Кнопки управления вопросами
-        questions_btn_frame = tk.Frame(center_frame)
+        questions_btn_frame = tk.Frame(center_frame, bg=configgui.COLORS["bg"])
         questions_btn_frame.pack(fill=tk.X, pady=5)
 
         tk.Button(
@@ -146,7 +147,7 @@ class QuestionEditorWindow:
             fg=configgui.COLORS["button_fg"]
         ).pack(fill=tk.X, pady=2)
 
-        move_frame = tk.Frame(questions_btn_frame)
+        move_frame = tk.Frame(questions_btn_frame, bg=configgui.COLORS["bg"])
         move_frame.pack(fill=tk.X, pady=2)
 
         tk.Button(
@@ -173,7 +174,7 @@ class QuestionEditorWindow:
         main_frame.rowconfigure(0, weight=1)
 
         # ========== НИЖНЯЯ ПАНЕЛЬ: КНОПКИ ==========
-        bottom_frame = tk.Frame(self.window)
+        bottom_frame = tk.Frame(self.window, bg=configgui.COLORS["bg"])
         bottom_frame.pack(fill=tk.X, padx=20, pady=10)
 
         tk.Button(

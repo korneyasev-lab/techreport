@@ -23,6 +23,7 @@ class QuestionTypeDialog:
         self.dialog = tk.Toplevel(parent)
         self.dialog.title("Выбор типа вопроса")
         self.dialog.geometry("1200x800")
+        self.dialog.configure(bg=configgui.COLORS["bg"])
         self.dialog.transient(parent)
         self.dialog.grab_set()
 
@@ -53,7 +54,7 @@ class QuestionTypeDialog:
         ).pack(fill=tk.X, pady=15, ipady=10)
 
         # Основной контейнер с двумя панелями
-        main_frame = tk.Frame(self.dialog)
+        main_frame = tk.Frame(self.dialog, bg=configgui.COLORS["bg"])
         main_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=10)
 
         # ========== ЛЕВАЯ ПАНЕЛЬ: ВЫБОР ТИПА ==========
@@ -62,7 +63,9 @@ class QuestionTypeDialog:
             text="ВЫБЕРИТЕ ТИП:",
             font=self.FONT_LARGE,
             padx=20,
-            pady=20
+            pady=20,
+            bg=configgui.COLORS["bg"],
+            fg=configgui.COLORS["label_fg"]
         )
         left_frame.grid(row=0, column=0, sticky="nsew", padx=10)
 
@@ -77,7 +80,7 @@ class QuestionTypeDialog:
         ]
 
         for i, (type_key, label, description) in enumerate(types_info):
-            rb_frame = tk.Frame(left_frame)
+            rb_frame = tk.Frame(left_frame, bg=configgui.COLORS["bg"])
             rb_frame.pack(fill=tk.X, pady=8)
 
             rb = tk.Radiobutton(
@@ -95,6 +98,7 @@ class QuestionTypeDialog:
                 text=description,
                 font=self.FONT_SMALL,
                 fg="gray",
+                bg=configgui.COLORS["bg"],
                 justify=tk.LEFT
             ).pack(anchor='w', padx=25)
 
@@ -104,7 +108,9 @@ class QuestionTypeDialog:
             text="ПОПРОБУЙТЕ (как будет в отчёте):",
             font=self.FONT_LARGE,
             padx=20,
-            pady=20
+            pady=20,
+            bg=configgui.COLORS["bg"],
+            fg=configgui.COLORS["label_fg"]
         )
         right_frame.grid(row=0, column=1, sticky="nsew", padx=10)
 
@@ -121,7 +127,7 @@ class QuestionTypeDialog:
         self.update_preview()
 
         # ========== НИЖНЯЯ ПАНЕЛЬ: КНОПКИ ==========
-        bottom_frame = tk.Frame(self.dialog)
+        bottom_frame = tk.Frame(self.dialog, bg=configgui.COLORS["bg"])
         bottom_frame.pack(fill=tk.X, padx=20, pady=15)
 
         tk.Button(
