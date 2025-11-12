@@ -44,14 +44,41 @@ class QuestionTypeDialog:
 
     def create_ui(self):
         """Создаёт интерфейс диалога."""
-        # Заголовок
+        # Заголовок с кнопками
+        header_frame = tk.Frame(self.dialog, bg=configgui.COLORS["title_bg"])
+        header_frame.pack(fill=tk.X, pady=0)
+
         tk.Label(
-            self.dialog,
+            header_frame,
             text="ВЫБОР ТИПА ВОПРОСА",
             font=self.FONT_TITLE,
             fg=configgui.COLORS["label_fg"],
             bg=configgui.COLORS["title_bg"]
-        ).pack(fill=tk.X, pady=15, ipady=10)
+        ).pack(side=tk.LEFT, padx=20, pady=15)
+
+        # Кнопки справа
+        buttons_right = tk.Frame(header_frame, bg=configgui.COLORS["title_bg"])
+        buttons_right.pack(side=tk.RIGHT, padx=20, pady=15)
+
+        tk.Button(
+            buttons_right,
+            text="✓ Выбрать",
+            font=self.FONT_LARGE,
+            bg=configgui.COLORS["button_bg"],
+            fg=configgui.COLORS["button_fg"],
+            command=self.on_select,
+            width=12
+        ).pack(side=tk.LEFT, padx=5)
+
+        tk.Button(
+            buttons_right,
+            text="❌ Отмена",
+            font=self.FONT_LARGE,
+            bg=configgui.COLORS["button_bg"],
+            fg=configgui.COLORS["button_fg"],
+            command=self.on_cancel,
+            width=12
+        ).pack(side=tk.LEFT, padx=5)
 
         # Основной контейнер с двумя панелями
         main_frame = tk.Frame(self.dialog, bg=configgui.COLORS["bg"])
@@ -125,32 +152,6 @@ class QuestionTypeDialog:
 
         # Показываем первый пример
         self.update_preview()
-
-        # ========== НИЖНЯЯ ПАНЕЛЬ: КНОПКИ ==========
-        bottom_frame = tk.Frame(self.dialog, bg=configgui.COLORS["bg"])
-        bottom_frame.pack(fill=tk.X, padx=20, pady=15)
-
-        tk.Button(
-            bottom_frame,
-            text="✓ Выбрать",
-            font=self.FONT_LARGE,
-            bg=configgui.COLORS["button_bg"],
-            fg=configgui.COLORS["button_fg"],
-            command=self.on_select,
-            width=15,
-            height=2
-        ).pack(side=tk.LEFT, padx=10)
-
-        tk.Button(
-            bottom_frame,
-            text="✗ Отмена",
-            font=self.FONT_LARGE,
-            bg=configgui.COLORS["button_bg"],
-            fg=configgui.COLORS["button_fg"],
-            command=self.on_cancel,
-            width=15,
-            height=2
-        ).pack(side=tk.RIGHT, padx=10)
 
     def update_preview(self):
         """Обновляет живой пример справа при выборе типа."""

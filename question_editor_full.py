@@ -83,14 +83,41 @@ class QuestionEditorDialog:
 
     def create_ui(self):
         """Создаёт интерфейс редактора."""
-        # Заголовок
+        # Заголовок с кнопками
+        header_frame = tk.Frame(self.dialog, bg=configgui.COLORS["title_bg"])
+        header_frame.pack(fill=tk.X, pady=0)
+
         tk.Label(
-            self.dialog,
+            header_frame,
             text="✏️ РЕДАКТОР ВОПРОСА",
             font=self.FONT_TITLE,
             fg=configgui.COLORS["label_fg"],
             bg=configgui.COLORS["title_bg"]
-        ).pack(fill=tk.X, pady=10, ipady=10)
+        ).pack(side=tk.LEFT, padx=20, pady=10)
+
+        # Кнопки справа
+        buttons_right = tk.Frame(header_frame, bg=configgui.COLORS["title_bg"])
+        buttons_right.pack(side=tk.RIGHT, padx=20, pady=10)
+
+        tk.Button(
+            buttons_right,
+            text="💾 Сохранить",
+            font=self.FONT_LARGE,
+            bg=configgui.COLORS["button_bg"],
+            fg=configgui.COLORS["button_fg"],
+            command=self.save_question,
+            width=12
+        ).pack(side=tk.LEFT, padx=5)
+
+        tk.Button(
+            buttons_right,
+            text="❌ Отмена",
+            font=self.FONT_LARGE,
+            bg=configgui.COLORS["button_bg"],
+            fg=configgui.COLORS["button_fg"],
+            command=self.cancel,
+            width=12
+        ).pack(side=tk.LEFT, padx=5)
 
         # Верхняя часть: выбор типа и пример
         top_frame = tk.Frame(self.dialog, bg=configgui.COLORS["bg"])
@@ -200,32 +227,6 @@ class QuestionEditorDialog:
         self.options_container.pack(fill=tk.BOTH, expand=True, pady=10)
 
         self.show_options_editor()
-
-        # ========== КНОПКИ ==========
-        btn_frame = tk.Frame(self.dialog, bg=configgui.COLORS["bg"])
-        btn_frame.pack(fill=tk.X, padx=20, pady=15)
-
-        tk.Button(
-            btn_frame,
-            text="💾 Сохранить",
-            font=self.FONT_LARGE,
-            bg=configgui.COLORS["button_bg"],
-            fg=configgui.COLORS["button_fg"],
-            command=self.save_question,
-            width=15,
-            height=2
-        ).pack(side=tk.LEFT, padx=10)
-
-        tk.Button(
-            btn_frame,
-            text="❌ Отмена",
-            font=self.FONT_LARGE,
-            bg=configgui.COLORS["button_bg"],
-            fg=configgui.COLORS["button_fg"],
-            command=self.cancel,
-            width=15,
-            height=2
-        ).pack(side=tk.RIGHT, padx=10)
 
         # Показываем первый пример
         self.update_preview()
