@@ -357,6 +357,10 @@ class ReportApp:
         """Показывает экран для заполнения текущего блока."""
         self.clear_container()
 
+        # Перезагружаем структуру отчета из БД (на случай изменений в редакторе)
+        self.report_blocks = config.get_report_blocks()
+        config.TOTAL_BLOCKS = len(self.report_blocks)
+
         block_key = f"block_{self.current_block}"
         block_data = self.report_blocks[block_key]
 
