@@ -6,6 +6,7 @@ from tkinter import ttk, messagebox, simpledialog
 import configgui
 from database import ConfigDatabase
 import config
+from question_type_dialog import QuestionTypeDialog
 
 
 class QuestionEditorWindow:
@@ -270,15 +271,32 @@ class QuestionEditorWindow:
         ).pack(fill=tk.X, pady=5)
 
         self.question_type_var = tk.StringVar(value=question['question_type'])
-        type_combo = ttk.Combobox(
-            self.editor_frame,
-            textvariable=self.question_type_var,
-            values=list(config.ELEMENT_TYPES.keys()),
-            state="readonly",
-            font=self.FONT_SMALL
+
+        # Рамка для отображения текущего типа и кнопки
+        type_frame = tk.Frame(self.editor_frame)
+        type_frame.pack(fill=tk.X, pady=5)
+
+        # Отображение текущего типа
+        type_name = config.ELEMENT_TYPES.get(question['question_type'], question['question_type'])
+        self.type_label = tk.Label(
+            type_frame,
+            text=f"→ {type_name}",
+            font=self.FONT_MEDIUM,
+            fg=configgui.COLORS["label_fg"],
+            anchor='w'
         )
-        type_combo.pack(fill=tk.X, pady=5)
-        type_combo.bind('<<ComboboxSelected>>', lambda e: self.on_type_changed())
+        self.type_label.pack(side=tk.LEFT, fill=tk.X, expand=True)
+
+        # Кнопка выбора типа
+        tk.Button(
+            type_frame,
+            text="⚙ Выбрать тип",
+            font=self.FONT_MEDIUM,
+            bg=configgui.COLORS["button_bg"],
+            fg=configgui.COLORS["button_fg"],
+            command=lambda: self.open_type_dialog(question_id),
+            width=15
+        ).pack(side=tk.RIGHT, padx=5)
 
         # Текст вопроса
         tk.Label(
@@ -425,10 +443,37 @@ class QuestionEditorWindow:
             self.selected_question_id = self.questions[index]['id']
             self.load_question_editor(self.selected_question_id)
 
-    def on_type_changed(self):
-        """Обработчик изменения типа вопроса."""
-        if self.selected_question_id:
-            self.load_question_editor(self.selected_question_id)
+    def open_type_dialog(self, question_id):
+        """Открывает диалог выбора типа вопроса."""
+        # Получаем текущие данные вопроса
+        question = next((q for q in self.questions if q['id'] == question_id), None)
+        if not question:
+            return
+
+        # Получаем варианты ответов для примера
+        options = self.db.get_question_options(question_id)
+        items = [opt['option_text'] for opt in options] if options else []
+
+        # Открываем диалог
+        dialog = QuestionTypeDialog(
+            self.window,
+            current_type=question['question_type'],
+            current_label=question['label'],
+            current_items=items
+        )
+        new_type = dialog.show()
+
+        # Если пользователь выбрал новый тип
+        if new_type and new_type != question['question_type']:
+            self.question_type_var.set(new_type)
+            # Обновляем отображение типа
+            type_name = config.ELEMENT_TYPES.get(new_type, new_type)
+            self.type_label.config(text=f"→ {type_name}")
+            messagebox.showinfo(
+                "Тип изменён",
+                f"Тип вопроса изменён на: {type_name}\n\nНе забудьте сохранить вопрос!",
+                parent=self.window
+            )
 
     # ============================================================
     # ДЕЙСТВИЯ С РАЗДЕЛАМИ
