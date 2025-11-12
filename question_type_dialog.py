@@ -168,6 +168,7 @@ class QuestionTypeDialog:
             text=example_label,
             font=self.FONT_MEDIUM,
             fg=configgui.COLORS["label_fg"],
+            bg=configgui.COLORS["bg"],
             anchor='w'
         ).pack(fill=tk.X, pady=10)
 
@@ -230,7 +231,8 @@ class QuestionTypeDialog:
             self.preview_frame,
             text="Другое:",
             font=self.FONT_MEDIUM,
-            fg=configgui.COLORS["label_fg"]
+            fg=configgui.COLORS["label_fg"],
+            bg=configgui.COLORS["bg"]
         ).pack(anchor='w', pady=(10, 3))
 
         tk.Entry(

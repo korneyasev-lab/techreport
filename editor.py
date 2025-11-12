@@ -62,8 +62,12 @@ class QuestionEditorWindow:
             font=self.FONT_SMALL,
             height=20,
             width=30,
-            bg=configgui.COLORS["text_bg"],
-            fg=configgui.COLORS["text_fg"]
+            bg=configgui.COLORS["bg"],
+            fg=configgui.COLORS["label_fg"],
+            selectbackground=configgui.COLORS["button_bg"],
+            selectforeground=configgui.COLORS["label_fg"],
+            highlightthickness=1,
+            highlightbackground=configgui.COLORS["button_bg"]
         )
         self.blocks_listbox.pack(fill=tk.BOTH, expand=True)
         self.blocks_listbox.bind('<<ListboxSelect>>', self.on_block_selected)
@@ -109,8 +113,12 @@ class QuestionEditorWindow:
             font=self.FONT_SMALL,
             height=20,
             width=40,
-            bg=configgui.COLORS["text_bg"],
-            fg=configgui.COLORS["text_fg"]
+            bg=configgui.COLORS["bg"],
+            fg=configgui.COLORS["label_fg"],
+            selectbackground=configgui.COLORS["button_bg"],
+            selectforeground=configgui.COLORS["label_fg"],
+            highlightthickness=1,
+            highlightbackground=configgui.COLORS["button_bg"]
         )
         self.questions_listbox.pack(fill=tk.BOTH, expand=True)
         self.questions_listbox.bind('<<ListboxSelect>>', self.on_question_selected)

@@ -253,8 +253,12 @@ class QuestionEditorDialog:
                 self.options_container,
                 font=self.FONT_MEDIUM,
                 height=5,
-                bg=configgui.COLORS["text_bg"],
-                fg=configgui.COLORS["text_fg"]
+                bg=configgui.COLORS["bg"],
+                fg=configgui.COLORS["label_fg"],
+                selectbackground=configgui.COLORS["button_bg"],
+                selectforeground=configgui.COLORS["label_fg"],
+                highlightthickness=1,
+                highlightbackground=configgui.COLORS["button_bg"]
             )
             self.options_listbox.pack(fill=tk.BOTH, expand=True, pady=5)
 
@@ -327,6 +331,7 @@ class QuestionEditorDialog:
             text=label,
             font=self.FONT_MEDIUM,
             fg=configgui.COLORS["label_fg"],
+            bg=configgui.COLORS["bg"],
             anchor='w'
         ).pack(fill=tk.X, pady=10)
 
@@ -357,7 +362,8 @@ class QuestionEditorDialog:
                 self.preview_frame,
                 text="⚠ Добавьте варианты ответов внизу",
                 font=self.FONT_SMALL,
-                fg="orange"
+                fg="orange",
+                bg=configgui.COLORS["bg"]
             ).pack(pady=20)
             return
 
@@ -379,7 +385,8 @@ class QuestionEditorDialog:
                 self.preview_frame,
                 text="⚠ Добавьте варианты ответов внизу",
                 font=self.FONT_SMALL,
-                fg="orange"
+                fg="orange",
+                bg=configgui.COLORS["bg"]
             ).pack(pady=10)
         else:
             for item in self.options_list:
@@ -396,7 +403,8 @@ class QuestionEditorDialog:
             self.preview_frame,
             text="Другое:",
             font=self.FONT_MEDIUM,
-            fg=configgui.COLORS["label_fg"]
+            fg=configgui.COLORS["label_fg"],
+            bg=configgui.COLORS["bg"]
         ).pack(anchor='w', pady=(10, 3))
 
         tk.Entry(
