@@ -119,14 +119,14 @@ class QuestionEditorDialog:
             width=12
         ).pack(side=tk.LEFT, padx=5)
 
-        # Верхняя часть: выбор типа и пример
+        # Верхняя часть: выбор типа и редактирование
         top_frame = tk.Frame(self.dialog, bg=configgui.COLORS["bg"])
         top_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=10)
 
-        # ========== ЛЕВАЯ ПАНЕЛЬ: ВЫБОР ТИПА ==========
+        # ========== ЛЕВАЯ ПАНЕЛЬ: ВЫБОР ТИПА (только 2!) ==========
         left_frame = tk.LabelFrame(
             top_frame,
-            text="ВЫБЕРИТЕ ТИП (16 шрифт):",
+            text="ВЫБЕРИТЕ ТИП:",
             font=self.FONT_LARGE,
             padx=20,
             pady=20,
@@ -135,19 +135,15 @@ class QuestionEditorDialog:
         )
         left_frame.grid(row=0, column=0, sticky="nsew", padx=10)
 
-        # Типы вопросов с описаниями
+        # Только 2 типа: Чекбоксы и Текстовое поле
         types_info = [
-            ("checkbox_group", "Группа чекбоксов", "Можно выбрать несколько\nвариантов"),
-            ("checkbox_group_with_text", "Чекбоксы + текст", "Галочки + поле 'Другое'"),
-            ("text_large", "Большое текстовое поле", "Много строк (3-5)\nдля подробного описания"),
-            ("text_medium", "Среднее поле", "2-3 строки для комментария"),
-            ("text_small", "Маленькое поле", "Одна строка\nдля короткого ответа"),
-            ("yes_no", "Да/Нет", "Только один вариант")
+            ("checkbox_group", "Чекбоксы", "Можно выбрать несколько\n(2-8 вариантов)"),
+            ("text", "Текстовое поле", "Малое/Среднее/Большое")
         ]
 
         for i, (type_key, label, description) in enumerate(types_info):
             rb_frame = tk.Frame(left_frame, bg=configgui.COLORS["bg"])
-            rb_frame.pack(fill=tk.X, pady=8)
+            rb_frame.pack(fill=tk.X, pady=15)
 
             rb = tk.Radiobutton(
                 rb_frame,
@@ -155,7 +151,7 @@ class QuestionEditorDialog:
                 variable=self.selected_type,
                 value=type_key,
                 font=self.FONT_LARGE,
-                command=self.update_preview
+                command=self.update_editor
             )
             rb.pack(anchor='w')
 
@@ -168,51 +164,41 @@ class QuestionEditorDialog:
                 justify=tk.LEFT
             ).pack(anchor='w', padx=25)
 
-        # ========== ПРАВАЯ ПАНЕЛЬ: ЖИВОЙ ПРИМЕР ==========
+        # ========== ПРАВАЯ ПАНЕЛЬ: РЕДАКТИРОВАНИЕ ==========
         right_frame = tk.LabelFrame(
             top_frame,
-            text="ПОПРОБУЙТЕ (как будет в отчёте):",
+            text="РЕДАКТИРОВАНИЕ:",
             font=self.FONT_LARGE,
             padx=20,
-            pady=20,
+            pady=10,
             bg=configgui.COLORS["bg"],
             fg=configgui.COLORS["label_fg"]
         )
         right_frame.grid(row=0, column=1, sticky="nsew", padx=10)
 
-        # Контейнер для примера
-        self.preview_frame = tk.Frame(right_frame, bg=configgui.COLORS["bg"])
-        self.preview_frame.pack(fill=tk.BOTH, expand=True)
-
-        # Настройка весов grid
-        top_frame.columnconfigure(0, weight=1)
-        top_frame.columnconfigure(1, weight=2)
-        top_frame.rowconfigure(0, weight=1)
-
-        # ========== НИЖНЯЯ ЧАСТЬ: РЕДАКТИРОВАНИЕ ==========
-        bottom_frame = tk.LabelFrame(
-            self.dialog,
-            text="Настройки вопроса:",
+        # Кнопка Редактировать вверху
+        tk.Button(
+            right_frame,
+            text="✏️ Редактировать",
             font=self.FONT_LARGE,
-            padx=20,
-            pady=15,
-            bg=configgui.COLORS["bg"],
-            fg=configgui.COLORS["label_fg"]
-        )
-        bottom_frame.pack(fill=tk.BOTH, padx=20, pady=10)
+            bg=configgui.COLORS["button_bg"],
+            fg=configgui.COLORS["button_fg"],
+            width=20,
+            height=1
+        ).pack(pady=10)
 
         # Текст вопроса
         tk.Label(
-            bottom_frame,
-            text="Текст вопроса (14 шрифт):",
+            right_frame,
+            text="Текст вопроса:",
             font=self.FONT_MEDIUM,
             fg=configgui.COLORS["label_fg"],
             bg=configgui.COLORS["bg"],
             anchor='w'
-        ).pack(fill=tk.X, pady=5)
+        ).pack(fill=tk.X, pady=(10, 5))
 
         self.label_text = tk.Text(
-            bottom_frame,
+            right_frame,
             height=2,
             font=self.FONT_MEDIUM,
             bg=configgui.COLORS["text_bg"],
@@ -222,78 +208,130 @@ class QuestionEditorDialog:
         self.label_text.pack(fill=tk.X, pady=5)
         self.label_text.insert("1.0", self.question_label)
 
-        # Варианты ответов (показываем только для чекбоксов)
-        self.options_container = tk.Frame(bottom_frame, bg=configgui.COLORS["bg"])
-        self.options_container.pack(fill=tk.BOTH, expand=True, pady=10)
+        # Контейнер для специфичных настроек (чекбоксы или размер текста)
+        self.editor_container = tk.Frame(right_frame, bg=configgui.COLORS["bg"])
+        self.editor_container.pack(fill=tk.BOTH, expand=True, pady=10)
 
-        self.show_options_editor()
+        # Настройка весов grid
+        top_frame.columnconfigure(0, weight=1)
+        top_frame.columnconfigure(1, weight=2)
+        top_frame.rowconfigure(0, weight=1)
 
-        # Показываем первый пример
-        self.update_preview()
+        # Показываем редактор для выбранного типа
+        self.update_editor()
 
-    def show_options_editor(self):
-        """Показывает редактор вариантов ответов."""
-        for widget in self.options_container.winfo_children():
+    def update_editor(self):
+        """Обновляет редактор в правой панели в зависимости от типа."""
+        # Очищаем контейнер
+        for widget in self.editor_container.winfo_children():
             widget.destroy()
 
         question_type = self.selected_type.get()
 
-        if 'checkbox' in question_type:
-            tk.Label(
-                self.options_container,
-                text="Варианты ответов (только для чекбоксов):",
+        if question_type == "checkbox_group":
+            self.show_checkbox_editor()
+        elif question_type == "text":
+            self.show_text_size_editor()
+
+    def show_checkbox_editor(self):
+        """Показывает редактор вариантов для чекбоксов."""
+        tk.Label(
+            self.editor_container,
+            text="Варианты ответов (2-8 вариантов):",
+            font=self.FONT_MEDIUM,
+            fg=configgui.COLORS["label_fg"],
+            bg=configgui.COLORS["bg"],
+            anchor='w'
+        ).pack(fill=tk.X, pady=5)
+
+        # Список вариантов
+        self.options_listbox = tk.Listbox(
+            self.editor_container,
+            font=self.FONT_MEDIUM,
+            height=6,
+            bg=configgui.COLORS["bg"],
+            fg=configgui.COLORS["label_fg"],
+            selectbackground=configgui.COLORS["button_bg"],
+            selectforeground=configgui.COLORS["label_fg"],
+            highlightthickness=1,
+            highlightbackground=configgui.COLORS["button_bg"]
+        )
+        self.options_listbox.pack(fill=tk.BOTH, expand=True, pady=5)
+
+        for option in self.options_list:
+            self.options_listbox.insert(tk.END, f"• {option}")
+
+        # Кнопки управления вариантами
+        btn_frame = tk.Frame(self.editor_container, bg=configgui.COLORS["bg"])
+        btn_frame.pack(fill=tk.X, pady=5)
+
+        self.new_option_entry = tk.Entry(
+            btn_frame,
+            font=self.FONT_MEDIUM,
+            bg=configgui.COLORS["text_bg"],
+            fg=configgui.COLORS["text_fg"]
+        )
+        self.new_option_entry.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(0, 5))
+
+        tk.Button(
+            btn_frame,
+            text="➕ Добавить",
+            font=self.FONT_SMALL,
+            command=self.add_option,
+            bg=configgui.COLORS["button_bg"],
+            fg=configgui.COLORS["button_fg"]
+        ).pack(side=tk.LEFT, padx=2)
+
+        tk.Button(
+            btn_frame,
+            text="🗑️ Удалить",
+            font=self.FONT_SMALL,
+            command=self.delete_option,
+            bg=configgui.COLORS["button_bg"],
+            fg=configgui.COLORS["button_fg"]
+        ).pack(side=tk.LEFT, padx=2)
+
+    def show_text_size_editor(self):
+        """Показывает выбор размера текстового поля."""
+        tk.Label(
+            self.editor_container,
+            text="Выберите размер поля:",
+            font=self.FONT_MEDIUM,
+            fg=configgui.COLORS["label_fg"],
+            bg=configgui.COLORS["bg"],
+            anchor='w'
+        ).pack(fill=tk.X, pady=5)
+
+        # Переменная для размера (если есть height в БД)
+        if self.question_height:
+            if self.question_height == 1:
+                default_size = "small"
+            elif self.question_height <= 3:
+                default_size = "medium"
+            else:
+                default_size = "large"
+        else:
+            default_size = "medium"
+
+        self.text_size_var = tk.StringVar(value=default_size)
+
+        sizes = [
+            ("small", "Малое (1 строка)", 1),
+            ("medium", "Среднее (2-3 строки)", 3),
+            ("large", "Большое (4-5 строк)", 5)
+        ]
+
+        for size_key, size_label, height in sizes:
+            rb = tk.Radiobutton(
+                self.editor_container,
+                text=size_label,
+                variable=self.text_size_var,
+                value=size_key,
                 font=self.FONT_MEDIUM,
-                fg=configgui.COLORS["label_fg"],
                 bg=configgui.COLORS["bg"],
-                anchor='w'
-            ).pack(fill=tk.X, pady=5)
-
-            # Список вариантов
-            self.options_listbox = tk.Listbox(
-                self.options_container,
-                font=self.FONT_MEDIUM,
-                height=5,
-                bg=configgui.COLORS["bg"],
-                fg=configgui.COLORS["label_fg"],
-                selectbackground=configgui.COLORS["button_bg"],
-                selectforeground=configgui.COLORS["label_fg"],
-                highlightthickness=1,
-                highlightbackground=configgui.COLORS["button_bg"]
+                fg=configgui.COLORS["label_fg"]
             )
-            self.options_listbox.pack(fill=tk.BOTH, expand=True, pady=5)
-
-            for option in self.options_list:
-                self.options_listbox.insert(tk.END, f"• {option}")
-
-            # Кнопки управления вариантами
-            btn_frame = tk.Frame(self.options_container, bg=configgui.COLORS["bg"])
-            btn_frame.pack(fill=tk.X, pady=5)
-
-            self.new_option_entry = tk.Entry(
-                btn_frame,
-                font=self.FONT_MEDIUM,
-                bg=configgui.COLORS["text_bg"],
-                fg=configgui.COLORS["text_fg"]
-            )
-            self.new_option_entry.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(0, 5))
-
-            tk.Button(
-                btn_frame,
-                text="➕ Добавить",
-                font=self.FONT_SMALL,
-                command=self.add_option,
-                bg=configgui.COLORS["button_bg"],
-                fg=configgui.COLORS["button_fg"]
-            ).pack(side=tk.LEFT, padx=2)
-
-            tk.Button(
-                btn_frame,
-                text="🗑️ Удалить выбранный",
-                font=self.FONT_SMALL,
-                command=self.delete_option,
-                bg=configgui.COLORS["button_bg"],
-                fg=configgui.COLORS["button_fg"]
-            ).pack(side=tk.LEFT, padx=2)
+            rb.pack(anchor='w', pady=5)
 
     def add_option(self):
         """Добавляет новый вариант ответа."""
@@ -302,7 +340,6 @@ class QuestionEditorDialog:
             self.options_list.append(new_text)
             self.options_listbox.insert(tk.END, f"• {new_text}")
             self.new_option_entry.delete(0, tk.END)
-            self.update_preview()
 
     def delete_option(self):
         """Удаляет выбранный вариант."""
@@ -311,170 +348,13 @@ class QuestionEditorDialog:
             index = selection[0]
             self.options_list.pop(index)
             self.options_listbox.delete(index)
-            self.update_preview()
 
-    def update_preview(self):
-        """Обновляет живой пример справа."""
-        # Очищаем контейнер
-        for widget in self.preview_frame.winfo_children():
-            widget.destroy()
 
-        # Обновляем редактор вариантов при смене типа
-        self.show_options_editor()
 
-        question_type = self.selected_type.get()
-        label = self.label_text.get("1.0", tk.END).strip() or "Пример вопроса:"
 
-        # Заголовок примера
-        tk.Label(
-            self.preview_frame,
-            text=label,
-            font=self.FONT_MEDIUM,
-            fg=configgui.COLORS["label_fg"],
-            bg=configgui.COLORS["bg"],
-            anchor='w'
-        ).pack(fill=tk.X, pady=10)
 
-        # Рисуем пример в зависимости от типа
-        if question_type == "checkbox_group":
-            self.show_checkbox_example()
 
-        elif question_type == "checkbox_group_with_text":
-            self.show_checkbox_with_text_example()
 
-        elif question_type == "text_large":
-            self.show_text_large_example()
-
-        elif question_type == "text_medium":
-            self.show_text_medium_example()
-
-        elif question_type == "text_small":
-            self.show_text_small_example()
-
-        elif question_type == "yes_no":
-            self.show_yes_no_example()
-
-    def show_checkbox_example(self):
-        """Показывает пример группы чекбоксов."""
-        # Используем реальные варианты из списка ниже
-        if not self.options_list:
-            tk.Label(
-                self.preview_frame,
-                text="⚠ Добавьте варианты ответов внизу",
-                font=self.FONT_SMALL,
-                fg="orange",
-                bg=configgui.COLORS["bg"]
-            ).pack(pady=20)
-            return
-
-        for item in self.options_list:
-            var = tk.BooleanVar()
-            cb = tk.Checkbutton(
-                self.preview_frame,
-                text=item,
-                variable=var,
-                font=self.FONT_MEDIUM
-            )
-            cb.pack(anchor='w', pady=3)
-
-    def show_checkbox_with_text_example(self):
-        """Показывает пример чекбоксов + текстовое поле."""
-        # Используем реальные варианты
-        if not self.options_list:
-            tk.Label(
-                self.preview_frame,
-                text="⚠ Добавьте варианты ответов внизу",
-                font=self.FONT_SMALL,
-                fg="orange",
-                bg=configgui.COLORS["bg"]
-            ).pack(pady=10)
-        else:
-            for item in self.options_list:
-                var = tk.BooleanVar()
-                cb = tk.Checkbutton(
-                    self.preview_frame,
-                    text=item,
-                    variable=var,
-                    font=self.FONT_MEDIUM
-                )
-                cb.pack(anchor='w', pady=3)
-
-        tk.Label(
-            self.preview_frame,
-            text="Другое:",
-            font=self.FONT_MEDIUM,
-            fg=configgui.COLORS["label_fg"],
-            bg=configgui.COLORS["bg"]
-        ).pack(anchor='w', pady=(10, 3))
-
-        tk.Entry(
-            self.preview_frame,
-            font=self.FONT_MEDIUM,
-            bg=configgui.COLORS["text_bg"],
-            fg=configgui.COLORS["text_fg"],
-            width=40
-        ).pack(anchor='w', pady=3)
-
-    def show_text_large_example(self):
-        """Показывает пример большого текстового поля."""
-        text_widget = tk.Text(
-            self.preview_frame,
-            height=5,
-            font=self.FONT_MEDIUM,
-            bg=configgui.COLORS["text_bg"],
-            fg=configgui.COLORS["text_fg"],
-            wrap=tk.WORD
-        )
-        text_widget.pack(fill=tk.BOTH, expand=True, pady=5)
-        text_widget.insert("1.0", "Введите подробный комментарий...\n\nМожно писать много строк.")
-
-    def show_text_medium_example(self):
-        """Показывает пример среднего текстового поля."""
-        text_widget = tk.Text(
-            self.preview_frame,
-            height=3,
-            font=self.FONT_MEDIUM,
-            bg=configgui.COLORS["text_bg"],
-            fg=configgui.COLORS["text_fg"],
-            wrap=tk.WORD
-        )
-        text_widget.pack(fill=tk.X, pady=5)
-        text_widget.insert("1.0", "Краткий комментарий (2-3 строки)...")
-
-    def show_text_small_example(self):
-        """Показывает пример маленького поля."""
-        entry = tk.Entry(
-            self.preview_frame,
-            font=self.FONT_MEDIUM,
-            bg=configgui.COLORS["text_bg"],
-            fg=configgui.COLORS["text_fg"],
-            width=30
-        )
-        entry.pack(anchor='w', pady=5)
-        entry.insert(0, "18-24°C")
-
-    def show_yes_no_example(self):
-        """Показывает пример выбора Да/Нет."""
-        var = tk.StringVar(value="Да")
-
-        rb_frame = tk.Frame(self.preview_frame)
-        rb_frame.pack(anchor='w', pady=10)
-
-        tk.Radiobutton(
-            rb_frame,
-            text="Да",
-            variable=var,
-            value="Да",
-            font=self.FONT_MEDIUM
-        ).pack(side=tk.LEFT, padx=10)
-
-        tk.Radiobutton(
-            rb_frame,
-            text="Нет",
-            variable=var,
-            value="Нет",
-            font=self.FONT_MEDIUM
-        ).pack(side=tk.LEFT, padx=10)
 
     def save_question(self):
         """Сохраняет изменения вопроса в БД."""
@@ -485,17 +365,44 @@ class QuestionEditorDialog:
             messagebox.showwarning("Ошибка", "Введите текст вопроса!", parent=self.dialog)
             return
 
+        # Определяем height и конкретный тип
+        if new_type == "text":
+            # Получаем размер из радиокнопок
+            size = self.text_size_var.get()
+            if size == "small":
+                final_type = "text_small"
+                height = 1
+            elif size == "medium":
+                final_type = "text_medium"
+                height = 3
+            else:  # large
+                final_type = "text_large"
+                height = 5
+        elif new_type == "checkbox_group":
+            final_type = "checkbox_group"
+            height = None
+            # Проверка: должно быть от 2 до 8 вариантов
+            if len(self.options_list) < 2:
+                messagebox.showwarning("Ошибка", "Добавьте минимум 2 варианта ответа!", parent=self.dialog)
+                return
+            if len(self.options_list) > 8:
+                messagebox.showwarning("Ошибка", "Максимум 8 вариантов ответа!", parent=self.dialog)
+                return
+        else:
+            final_type = new_type
+            height = self.question_height
+
         # Сохраняем вопрос
         self.db.update_question(
             self.question_id,
             new_label,
-            new_type,
-            self.question_height,
+            final_type,
+            height,
             self.question_placeholder
         )
 
         # Если тип чекбоксы - обновляем варианты
-        if 'checkbox' in new_type:
+        if new_type == "checkbox_group":
             # Удаляем старые варианты
             for opt in self.question_options:
                 self.db.delete_option(opt['id'])
