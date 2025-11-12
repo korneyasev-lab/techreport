@@ -7,7 +7,8 @@ a = Analysis(
     pathex=[],
     binaries=[],
     datas=[
-        ('database', 'database'),  # Включаем папку database
+        # База данных НЕ включается в .exe - она должна быть снаружи
+        # чтобы пользователь мог редактировать структуру отчетов
     ],
     hiddenimports=[
         'tkinter',

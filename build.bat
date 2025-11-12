@@ -29,10 +29,18 @@ if errorlevel 1 (
 )
 
 echo.
-echo [3/3] Создание папок для данных...
+echo [3/4] Создание папок для данных...
 if not exist dist\database mkdir dist\database
 if not exist dist\reports mkdir dist\reports
 if not exist dist\templates mkdir dist\templates
+
+echo [4/4] Копирование базы данных (если есть)...
+if exist database\*.db (
+    copy database\*.db dist\database\
+    echo База данных скопирована в dist\database\
+) else (
+    echo База данных не найдена - будет создана при первом запуске
+)
 
 echo.
 echo ========================================
@@ -40,5 +48,8 @@ echo   Сборка завершена успешно!
 echo ========================================
 echo.
 echo Исполняемый файл: dist\TechReport.exe
+echo.
+echo ВАЖНО: База данных находится в dist\database\ СНАРУЖИ .exe
+echo        Это позволяет редактировать структуру отчетов.
 echo.
 pause

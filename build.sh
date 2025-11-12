@@ -25,10 +25,18 @@ if [ $? -ne 0 ]; then
 fi
 
 echo ""
-echo "[3/3] Создание папок для данных..."
+echo "[3/4] Создание папок для данных..."
 mkdir -p dist/database
 mkdir -p dist/reports
 mkdir -p dist/templates
+
+echo "[4/4] Копирование базы данных (если есть)..."
+if ls database/*.db 1> /dev/null 2>&1; then
+    cp database/*.db dist/database/
+    echo "База данных скопирована в dist/database/"
+else
+    echo "База данных не найдена - будет создана при первом запуске"
+fi
 
 echo ""
 echo "========================================"
@@ -36,4 +44,7 @@ echo "  Сборка завершена успешно!"
 echo "========================================"
 echo ""
 echo "Исполняемый файл: dist/TechReport"
+echo ""
+echo "ВАЖНО: База данных находится в dist/database/ СНАРУЖИ исполняемого файла"
+echo "       Это позволяет редактировать структуру отчетов."
 echo ""

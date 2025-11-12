@@ -21,12 +21,55 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
 
-    - name: Build executable
-      run: pyinstaller --onefile --windowed --name TechReport main.py
+    - name: Build executable with build.spec
+      run: pyinstaller build.spec
+
+    - name: Create database structure
+      run: |
+        mkdir -p dist/database
+        mkdir -p dist/reports
+        mkdir -p dist/templates
+      shell: bash
+
+    - name: Copy database files (if exist)
+      run: |
+        if (Test-Path database/*.db) {
+          Copy-Item database/*.db dist/database/
+        }
+      shell: pwsh
+      continue-on-error: true
+
+    - name: Create README for distribution
+      run: |
+        @"
+        # TechReport - Система отчетов качества
+
+        ## Запуск
+
+        Просто запустите TechReport.exe
+
+        ## Структура
+
+        - TechReport.exe - главный исполняемый файл
+        - database/ - база данных с конфигурацией отчетов (СНАРУЖИ .exe!)
+        - reports/ - папка для сохраненных отчетов
+        - templates/ - шаблоны документов
+
+        ## База данных
+
+        База данных находится в папке database/ СНАРУЖИ .exe.
+        Это позволяет редактировать структуру отчетов через
+        встроенный редактор вопросов без пересборки приложения.
+
+        ## Требования
+
+        Windows 10 или новее
+        "@ | Out-File -FilePath dist/README.txt -Encoding UTF8
+      shell: pwsh
 
     - name: Upload artifact
       uses: actions/upload-artifact@v4
       with:
         name: TechReport-Windows
-        path: dist/TechReport.exe
+        path: dist/
         retention-days: 30
