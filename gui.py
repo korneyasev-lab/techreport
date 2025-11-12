@@ -76,7 +76,7 @@ class ReportApp:
     # ============================================================
 
     def show_main_screen(self):
-        """Показывает главный экран с README слева и кнопками справа."""
+        """Показывает главный экран с README слева и параметрами отчета справа."""
         self.clear_container()
 
         # Заголовок
@@ -118,24 +118,103 @@ class ReportApp:
         )
         readme_label.pack(fill=tk.BOTH, expand=True)
 
-        # ПРАВАЯ КОЛОНКА - Кнопки
+        # ПРАВАЯ КОЛОНКА - Параметры отчета и кнопки
         right_frame = tk.Frame(content_frame, bg=configgui.COLORS["bg"])
-        right_frame.pack(side=tk.RIGHT, fill=tk.Y)
+        right_frame.pack(side=tk.RIGHT, fill=tk.Y, padx=10)
 
-        # Отступ сверху чтобы кнопки были по центру
-        tk.Frame(right_frame, height=100, bg=configgui.COLORS["bg"]).pack()
-
-        tk.Button(
+        # Секция: Создать отчёт
+        create_frame = tk.LabelFrame(
             right_frame,
-            text=configgui.START_BTN,
-            font=self.FONT_MAIN_BUTTON,
-            width=25,
-            height=2,
+            text="🆕 СОЗДАТЬ ОТЧЁТ",
+            font=self.FONT_LARGE,
+            padx=20,
+            pady=15,
+            bg=configgui.COLORS["bg"],
+            fg=configgui.COLORS["label_fg"]
+        )
+        create_frame.pack(pady=(0, 20), fill=tk.X)
+
+        # Год
+        tk.Label(
+            create_frame,
+            text="Год:",
+            font=self.FONT_MEDIUM,
+            fg=configgui.COLORS["label_fg"],
+            bg=configgui.COLORS["bg"],
+            anchor='w'
+        ).pack(fill=tk.X, pady=(5, 2))
+
+        self.year_var = tk.StringVar(value=str(datetime.now().year))
+        year_entry = tk.Entry(
+            create_frame,
+            textvariable=self.year_var,
+            font=self.FONT_MEDIUM,
+            bg=configgui.COLORS["text_bg"],
+            fg=configgui.COLORS["text_fg"]
+        )
+        year_entry.pack(fill=tk.X, pady=(0, 10))
+        self._update_weeks_timer = None
+        self.year_var.trace_add("write", self._schedule_update_weeks)
+
+        # Месяц
+        tk.Label(
+            create_frame,
+            text="Месяц:",
+            font=self.FONT_MEDIUM,
+            fg=configgui.COLORS["label_fg"],
+            bg=configgui.COLORS["bg"],
+            anchor='w'
+        ).pack(fill=tk.X, pady=(0, 2))
+
+        self.month_var = tk.StringVar()
+        month_combo = ttk.Combobox(
+            create_frame,
+            textvariable=self.month_var,
+            values=configgui.MONTHS,
+            font=self.FONT_MEDIUM,
+            state="readonly"
+        )
+        month_combo.pack(fill=tk.X, pady=(0, 10))
+        month_combo.set(configgui.MONTHS[datetime.now().month - 1])
+        month_combo.bind("<<ComboboxSelected>>", self._schedule_update_weeks)
+
+        # Неделя
+        tk.Label(
+            create_frame,
+            text="Неделя:",
+            font=self.FONT_MEDIUM,
+            fg=configgui.COLORS["label_fg"],
+            bg=configgui.COLORS["bg"],
+            anchor='w'
+        ).pack(fill=tk.X, pady=(0, 2))
+
+        self.week_var = tk.StringVar()
+        self.week_combo = ttk.Combobox(
+            create_frame,
+            textvariable=self.week_var,
+            font=self.FONT_MEDIUM,
+            state="disabled"
+        )
+        self.week_combo.pack(fill=tk.X, pady=(0, 15))
+
+        # Отложенное заполнение недель для быстрой загрузки окна
+        self.root.after(1, self._update_weeks)
+
+        # Кнопка "Начать заполнение"
+        tk.Button(
+            create_frame,
+            text="Начать заполнение",
+            font=self.FONT_MEDIUM,
             bg=configgui.COLORS["button_bg"],
             fg=configgui.COLORS["button_fg"],
-            command=self.show_report_params_screen
-        ).pack(pady=self.padding["pady"] * 3)
+            command=self.start_report,
+            width=20
+        ).pack(pady=5)
 
+        # Разделительная линия
+        tk.Frame(right_frame, height=2, bg=configgui.COLORS["button_bg"]).pack(fill=tk.X, pady=15)
+
+        # Остальные кнопки
         tk.Button(
             right_frame,
             text=configgui.ARCHIVE_BTN,
@@ -145,7 +224,7 @@ class ReportApp:
             bg=configgui.COLORS["button_bg"],
             fg=configgui.COLORS["button_fg"],
             command=self.show_archive
-        ).pack(pady=self.padding["pady"] * 3)
+        ).pack(pady=self.padding["pady"] * 2)
 
         tk.Button(
             right_frame,
@@ -156,7 +235,7 @@ class ReportApp:
             bg=configgui.COLORS["button_bg"],
             fg=configgui.COLORS["button_fg"],
             command=self.open_editor
-        ).pack(pady=self.padding["pady"] * 3)
+        ).pack(pady=self.padding["pady"] * 2)
 
         tk.Button(
             right_frame,
@@ -167,7 +246,7 @@ class ReportApp:
             bg=configgui.COLORS["button_bg"],
             fg=configgui.COLORS["button_fg"],
             command=self.root.quit
-        ).pack(pady=self.padding["pady"] * 3)
+        ).pack(pady=self.padding["pady"] * 2)
 
     # ============================================================
     # ЭКРАН ВЫБОРА ПАРАМЕТРОВ ОТЧЁТА
