@@ -88,8 +88,7 @@ class QuestionTypeDialog:
                 command=self.update_preview,
                 bg=configgui.COLORS["bg"],
                 fg=configgui.COLORS["label_fg"],
-                activebackground=configgui.COLORS["bg"],
-                selectcolor=configgui.COLORS["button_bg"]
+                activebackground=configgui.COLORS["bg"]
             )
             rb.pack(anchor='w')
 
@@ -204,8 +203,7 @@ class QuestionTypeDialog:
                 font=self.FONT_MEDIUM,
                 bg=configgui.COLORS["bg"],
                 fg=configgui.COLORS["label_fg"],
-                activebackground=configgui.COLORS["bg"],
-                selectcolor=configgui.COLORS["text_bg"]
+                activebackground=configgui.COLORS["bg"]
             )
             cb.pack(anchor='w', pady=3)
 
@@ -225,8 +223,7 @@ class QuestionTypeDialog:
                 font=self.FONT_MEDIUM,
                 bg=configgui.COLORS["bg"],
                 fg=configgui.COLORS["label_fg"],
-                activebackground=configgui.COLORS["bg"],
-                selectcolor=configgui.COLORS["text_bg"]
+                activebackground=configgui.COLORS["bg"]
             )
             cb.pack(anchor='w', pady=3)
 
@@ -298,8 +295,7 @@ class QuestionTypeDialog:
             font=self.FONT_MEDIUM,
             bg=configgui.COLORS["bg"],
             fg=configgui.COLORS["label_fg"],
-            activebackground=configgui.COLORS["bg"],
-            selectcolor=configgui.COLORS["button_bg"]
+            activebackground=configgui.COLORS["bg"]
         ).pack(side=tk.LEFT, padx=10)
 
         tk.Radiobutton(
@@ -310,8 +306,7 @@ class QuestionTypeDialog:
             font=self.FONT_MEDIUM,
             bg=configgui.COLORS["bg"],
             fg=configgui.COLORS["label_fg"],
-            activebackground=configgui.COLORS["bg"],
-            selectcolor=configgui.COLORS["button_bg"]
+            activebackground=configgui.COLORS["bg"]
         ).pack(side=tk.LEFT, padx=10)
 
     def on_select(self):

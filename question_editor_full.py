@@ -127,8 +127,7 @@ class QuestionEditorDialog:
                 command=self.update_preview,
                 bg=configgui.COLORS["bg"],
                 fg=configgui.COLORS["label_fg"],
-                activebackground=configgui.COLORS["bg"],
-                selectcolor=configgui.COLORS["button_bg"]
+                activebackground=configgui.COLORS["bg"]
             )
             rb.pack(anchor='w')
 
@@ -362,8 +361,7 @@ class QuestionEditorDialog:
                 font=self.FONT_MEDIUM,
                 bg=configgui.COLORS["bg"],
                 fg=configgui.COLORS["label_fg"],
-                activebackground=configgui.COLORS["bg"],
-                selectcolor=configgui.COLORS["text_bg"]
+                activebackground=configgui.COLORS["bg"]
             )
             cb.pack(anchor='w', pady=3)
 
@@ -387,8 +385,7 @@ class QuestionEditorDialog:
                     font=self.FONT_MEDIUM,
                     bg=configgui.COLORS["bg"],
                     fg=configgui.COLORS["label_fg"],
-                    activebackground=configgui.COLORS["bg"],
-                    selectcolor=configgui.COLORS["text_bg"]
+                    activebackground=configgui.COLORS["bg"]
                 )
                 cb.pack(anchor='w', pady=3)
 
@@ -460,8 +457,7 @@ class QuestionEditorDialog:
             font=self.FONT_MEDIUM,
             bg=configgui.COLORS["bg"],
             fg=configgui.COLORS["label_fg"],
-            activebackground=configgui.COLORS["bg"],
-            selectcolor=configgui.COLORS["button_bg"]
+            activebackground=configgui.COLORS["bg"]
         ).pack(side=tk.LEFT, padx=10)
 
         tk.Radiobutton(
@@ -472,8 +468,7 @@ class QuestionEditorDialog:
             font=self.FONT_MEDIUM,
             bg=configgui.COLORS["bg"],
             fg=configgui.COLORS["label_fg"],
-            activebackground=configgui.COLORS["bg"],
-            selectcolor=configgui.COLORS["button_bg"]
+            activebackground=configgui.COLORS["bg"]
         ).pack(side=tk.LEFT, padx=10)
 
     def save_question(self):
