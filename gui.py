@@ -18,6 +18,7 @@ class ReportApp:
     def __init__(self, root):
         self.root = root
         self.root.title(configgui.APP_TITLE)
+        self.root.configure(bg=configgui.COLORS["bg"])
 
         # --- Адаптация настроек под ОС ---
         fonts, padding = configgui.get_settings()
@@ -50,7 +51,7 @@ class ReportApp:
             w, h = self.root.winfo_screenwidth(), self.root.winfo_screenheight()
             self.root.geometry(f"{w}x{h}+0+0")
 
-        self.main_container = tk.Frame(root)
+        self.main_container = tk.Frame(root, bg=configgui.COLORS["bg"])
         self.main_container.pack(fill=tk.BOTH, expand=True)
 
         # Логика
@@ -88,11 +89,11 @@ class ReportApp:
         ).pack(fill=tk.X, pady=15, ipady=10)
 
         # Контейнер для двух колонок
-        content_frame = tk.Frame(self.main_container)
+        content_frame = tk.Frame(self.main_container, bg=configgui.COLORS["bg"])
         content_frame.pack(fill=tk.BOTH, expand=True, padx=40)
 
         # ЛЕВАЯ КОЛОНКА - README
-        left_frame = tk.Frame(content_frame)
+        left_frame = tk.Frame(content_frame, bg=configgui.COLORS["bg"])
         left_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=(0, 20))
 
         readme_frame = tk.LabelFrame(
@@ -100,7 +101,9 @@ class ReportApp:
             text="📖 Инструкция",
             font=("Arial", self.fonts["medium"], "bold"),
             padx=20,
-            pady=15
+            pady=15,
+            bg=configgui.COLORS["bg"],
+            fg=configgui.COLORS["label_fg"]
         )
         readme_frame.pack(fill=tk.BOTH, expand=True)
 
@@ -116,11 +119,11 @@ class ReportApp:
         readme_label.pack(fill=tk.BOTH, expand=True)
 
         # ПРАВАЯ КОЛОНКА - Кнопки
-        right_frame = tk.Frame(content_frame)
+        right_frame = tk.Frame(content_frame, bg=configgui.COLORS["bg"])
         right_frame.pack(side=tk.RIGHT, fill=tk.Y)
 
         # Отступ сверху чтобы кнопки были по центру
-        tk.Frame(right_frame, height=100).pack()
+        tk.Frame(right_frame, height=100, bg=configgui.COLORS["bg"]).pack()
 
         tk.Button(
             right_frame,
@@ -182,11 +185,11 @@ class ReportApp:
             bg=configgui.COLORS["title_bg"]
         ).pack(fill=tk.X, pady=15, ipady=10)
 
-        form_frame = tk.Frame(self.main_container)
+        form_frame = tk.Frame(self.main_container, bg=configgui.COLORS["bg"])
         form_frame.pack(expand=True, pady=20)
 
         # Год
-        tk.Label(form_frame, text="Год:", font=self.FONT_MEDIUM, fg=configgui.COLORS["label_fg"]).grid(
+        tk.Label(form_frame, text="Год:", font=self.FONT_MEDIUM, fg=configgui.COLORS["label_fg"], bg=configgui.COLORS["bg"]).grid(
             row=0, column=0, sticky="w", pady=5, padx=5
         )
         self.year_var = tk.StringVar(value=str(datetime.now().year))
@@ -199,7 +202,7 @@ class ReportApp:
         self.year_var.trace_add("write", self._schedule_update_weeks)
 
         # Месяц
-        tk.Label(form_frame, text="Месяц:", font=self.FONT_MEDIUM, fg=configgui.COLORS["label_fg"]).grid(
+        tk.Label(form_frame, text="Месяц:", font=self.FONT_MEDIUM, fg=configgui.COLORS["label_fg"], bg=configgui.COLORS["bg"]).grid(
             row=1, column=0, sticky="w", pady=5, padx=5
         )
         self.month_var = tk.StringVar()
@@ -212,7 +215,7 @@ class ReportApp:
         month_combo.bind("<<ComboboxSelected>>", self._schedule_update_weeks)
 
         # Неделя
-        tk.Label(form_frame, text="Неделя:", font=self.FONT_MEDIUM, fg=configgui.COLORS["label_fg"]).grid(
+        tk.Label(form_frame, text="Неделя:", font=self.FONT_MEDIUM, fg=configgui.COLORS["label_fg"], bg=configgui.COLORS["bg"]).grid(
             row=2, column=0, sticky="w", pady=5, padx=5
         )
         self.week_var = tk.StringVar()
@@ -226,7 +229,7 @@ class ReportApp:
         self.root.after(1, self._update_weeks)
 
         # Кнопки
-        btn_frame = tk.Frame(form_frame)
+        btn_frame = tk.Frame(form_frame, bg=configgui.COLORS["bg"])
         btn_frame.grid(row=3, column=0, columnspan=2, pady=15)
 
         tk.Button(
@@ -358,7 +361,7 @@ class ReportApp:
         block_data = self.report_blocks[block_key]
 
         # Кнопка возврата в главное меню
-        top_frame = tk.Frame(self.main_container)
+        top_frame = tk.Frame(self.main_container, bg=configgui.COLORS["bg"])
         top_frame.pack(fill=tk.X, pady=5)
 
         tk.Button(
@@ -377,7 +380,8 @@ class ReportApp:
             self.main_container,
             text=header,
             font=self.FONT_MEDIUM,
-            fg=configgui.COLORS["label_fg"]
+            fg=configgui.COLORS["label_fg"],
+            bg=configgui.COLORS["bg"]
         ).pack(pady=5)
 
         # Прогресс
@@ -386,16 +390,17 @@ class ReportApp:
             self.main_container,
             text=progress_text,
             font=self.FONT_LARGE,
-            fg=configgui.COLORS["label_fg"]
+            fg=configgui.COLORS["label_fg"],
+            bg=configgui.COLORS["bg"]
         ).pack(pady=3)
 
         # Canvas для прокрутки
-        canvas_frame = tk.Frame(self.main_container)
+        canvas_frame = tk.Frame(self.main_container, bg=configgui.COLORS["bg"])
         canvas_frame.pack(pady=10, fill=tk.BOTH, expand=True)
 
-        canvas = tk.Canvas(canvas_frame)
+        canvas = tk.Canvas(canvas_frame, bg=configgui.COLORS["bg"], highlightthickness=0)
         scrollbar = ttk.Scrollbar(canvas_frame, orient="vertical", command=canvas.yview)
-        scrollable_frame = tk.Frame(canvas, padx=40)
+        scrollable_frame = tk.Frame(canvas, padx=40, bg=configgui.COLORS["bg"])
 
         scrollable_frame.bind(
             "<Configure>",
@@ -450,7 +455,9 @@ class ReportApp:
             text=element_data['label'],
             font=self.FONT_MEDIUM,
             padx=10,
-            pady=5
+            pady=5,
+            bg=configgui.COLORS["bg"],
+            fg=configgui.COLORS["label_fg"]
         )
         frame.pack(pady=5, fill=tk.X)
 
@@ -478,13 +485,15 @@ class ReportApp:
 
     def create_text_field(self, parent, element_key, element_data, height=4):
         """Создает многострочное текстовое поле с белым фоном."""
-        frame = tk.Frame(parent)
+        frame = tk.Frame(parent, bg=configgui.COLORS["bg"])
         frame.pack(pady=5, fill=tk.X)
 
         tk.Label(
             frame,
             text=element_data['label'],
-            font=self.FONT_MEDIUM
+            font=self.FONT_MEDIUM,
+            bg=configgui.COLORS["bg"],
+            fg=configgui.COLORS["label_fg"]
         ).pack(anchor="w", pady=2)
 
         text_widget = tk.Text(
@@ -524,13 +533,15 @@ class ReportApp:
 
     def create_entry_field(self, parent, element_key, element_data):
         """Создает однострочное поле ввода."""
-        frame = tk.Frame(parent)
+        frame = tk.Frame(parent, bg=configgui.COLORS["bg"])
         frame.pack(pady=5, fill=tk.X)
 
         tk.Label(
             frame,
             text=element_data['label'],
-            font=self.FONT_MEDIUM
+            font=self.FONT_MEDIUM,
+            bg=configgui.COLORS["bg"],
+            fg=configgui.COLORS["label_fg"]
         ).pack(anchor="w", pady=2)
 
         entry_var = tk.StringVar()
@@ -572,13 +583,15 @@ class ReportApp:
 
     def create_yes_no_field(self, parent, element_key, element_data):
         """Создает поле с выбором Да/Нет."""
-        frame = tk.Frame(parent)
+        frame = tk.Frame(parent, bg=configgui.COLORS["bg"])
         frame.pack(pady=5, fill=tk.X)
 
         tk.Label(
             frame,
             text=element_data['label'],
-            font=self.FONT_MEDIUM
+            font=self.FONT_MEDIUM,
+            bg=configgui.COLORS["bg"],
+            fg=configgui.COLORS["label_fg"]
         ).pack(anchor="w", pady=2)
 
         answer_var = tk.StringVar()
@@ -588,7 +601,7 @@ class ReportApp:
         if saved_value:
             answer_var.set(saved_value)
 
-        button_frame = tk.Frame(frame)
+        button_frame = tk.Frame(frame, bg=configgui.COLORS["bg"])
         button_frame.pack(anchor="w", pady=2)
 
         def set_answer(value):
@@ -635,7 +648,9 @@ class ReportApp:
             text=element_data['label'],
             font=self.FONT_MEDIUM,
             padx=10,
-            pady=5
+            pady=5,
+            bg=configgui.COLORS["bg"],
+            fg=configgui.COLORS["label_fg"]
         )
         frame.pack(pady=5, fill=tk.X)
 
@@ -661,13 +676,15 @@ class ReportApp:
             checkbox_vars.append((item, var))
 
         # Текстовое поле "Другое"
-        other_frame = tk.Frame(frame)
+        other_frame = tk.Frame(frame, bg=configgui.COLORS["bg"])
         other_frame.pack(fill=tk.X, pady=2)
 
         tk.Label(
             other_frame,
             text=element_data.get('text_field_label', 'Другое:'),
-            font=self.FONT_MEDIUM
+            font=self.FONT_MEDIUM,
+            bg=configgui.COLORS["bg"],
+            fg=configgui.COLORS["label_fg"]
         ).pack(anchor="w")
 
         text_var = tk.StringVar()
@@ -699,7 +716,7 @@ class ReportApp:
 
     def create_navigation_buttons(self):
         """Создает кнопки навигации внизу экрана."""
-        btn_frame = tk.Frame(self.main_container)
+        btn_frame = tk.Frame(self.main_container, bg=configgui.COLORS["bg"])
         btn_frame.pack(pady=10, fill=tk.X)
         btn_frame.columnconfigure(0, weight=1)
         btn_frame.columnconfigure(1, weight=1)
@@ -819,6 +836,7 @@ class ReportApp:
         dialog = tk.Toplevel(self.root)
         dialog.title("Выбор формата экспорта")
         dialog.geometry("400x250")
+        dialog.configure(bg=configgui.COLORS["bg"])
         dialog.transient(self.root)
         dialog.grab_set()
 
@@ -833,14 +851,15 @@ class ReportApp:
             dialog,
             text="Выберите формат для сохранения отчёта:",
             font=self.FONT_MEDIUM,
-            fg=configgui.COLORS["label_fg"]
+            fg=configgui.COLORS["label_fg"],
+            bg=configgui.COLORS["bg"]
         ).pack(pady=20)
 
         # Переменная для выбранного формата
         format_var = tk.StringVar(value="pdf")
 
         # Радиокнопки
-        formats_frame = tk.Frame(dialog)
+        formats_frame = tk.Frame(dialog, bg=configgui.COLORS["bg"])
         formats_frame.pack(pady=10)
 
         tk.Radiobutton(
@@ -874,7 +893,7 @@ class ReportApp:
         ).pack(anchor="w", pady=5)
 
         # Кнопки
-        buttons_frame = tk.Frame(dialog)
+        buttons_frame = tk.Frame(dialog, bg=configgui.COLORS["bg"])
         buttons_frame.pack(pady=20)
 
         def on_save():
@@ -949,7 +968,7 @@ class ReportApp:
 
         if not reports:
             # Если отчётов нет
-            empty_frame = tk.Frame(self.main_container)
+            empty_frame = tk.Frame(self.main_container, bg=configgui.COLORS["bg"])
             empty_frame.pack(expand=True)
 
             tk.Label(
@@ -957,6 +976,7 @@ class ReportApp:
                 text="Архив пуст\n\nСоздайте первый отчёт!",
                 font=self.FONT_LARGE,
                 fg=configgui.COLORS["label_fg"],
+                bg=configgui.COLORS["bg"],
                 justify=tk.CENTER
             ).pack(pady=40)
 
@@ -971,13 +991,13 @@ class ReportApp:
             return
 
         # Фрейм для списка отчётов с прокруткой
-        list_frame = tk.Frame(self.main_container)
+        list_frame = tk.Frame(self.main_container, bg=configgui.COLORS["bg"])
         list_frame.pack(fill=tk.BOTH, expand=True, padx=40, pady=10)
 
         # Canvas для прокрутки
-        canvas = tk.Canvas(list_frame)
+        canvas = tk.Canvas(list_frame, bg=configgui.COLORS["bg"], highlightthickness=0)
         scrollbar = ttk.Scrollbar(list_frame, orient="vertical", command=canvas.yview)
-        scrollable_frame = tk.Frame(canvas)
+        scrollable_frame = tk.Frame(canvas, bg=configgui.COLORS["bg"])
 
         scrollable_frame.bind(
             "<Configure>",
@@ -991,7 +1011,7 @@ class ReportApp:
         scrollbar.pack(side="right", fill="y")
 
         # Заголовки таблицы
-        header_frame = tk.Frame(scrollable_frame, relief=tk.RAISED, borderwidth=1)
+        header_frame = tk.Frame(scrollable_frame, relief=tk.RAISED, borderwidth=1, bg=configgui.COLORS["bg"])
         header_frame.pack(fill=tk.X, pady=(0, 5))
 
         tk.Label(
@@ -999,6 +1019,7 @@ class ReportApp:
             text="Имя файла",
             font=self.FONT_MEDIUM,
             fg=configgui.COLORS["label_fg"],
+            bg=configgui.COLORS["bg"],
             width=40,
             anchor="w"
         ).grid(row=0, column=0, padx=10, pady=5, sticky="w")
@@ -1008,6 +1029,7 @@ class ReportApp:
             text="Дата создания",
             font=self.FONT_MEDIUM,
             fg=configgui.COLORS["label_fg"],
+            bg=configgui.COLORS["bg"],
             width=20,
             anchor="w"
         ).grid(row=0, column=1, padx=10, pady=5)
@@ -1017,6 +1039,7 @@ class ReportApp:
             text="Действия",
             font=self.FONT_MEDIUM,
             fg=configgui.COLORS["label_fg"],
+            bg=configgui.COLORS["bg"],
             width=20
         ).grid(row=0, column=2, padx=10, pady=5)
 
@@ -1026,7 +1049,7 @@ class ReportApp:
                 scrollable_frame,
                 relief=tk.GROOVE,
                 borderwidth=1,
-                bg="white" if i % 2 == 0 else "#f5f5f5"
+                bg=configgui.COLORS["bg"] if i % 2 == 0 else configgui.COLORS["button_bg"]
             )
             row_frame.pack(fill=tk.X, pady=2)
 
@@ -1076,7 +1099,7 @@ class ReportApp:
             ).pack(side=tk.LEFT, padx=5)
 
         # Кнопка назад внизу
-        bottom_frame = tk.Frame(self.main_container)
+        bottom_frame = tk.Frame(self.main_container, bg=configgui.COLORS["bg"])
         bottom_frame.pack(pady=15)
 
         tk.Button(
