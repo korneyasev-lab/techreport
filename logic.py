@@ -13,6 +13,8 @@ class ReportLogic:
         self.report_params = {}
         self.answers = {}
         self._ensure_folders()
+        # Загрузка структуры отчёта из БД или config.py
+        self.report_blocks = config.get_report_blocks()
 
     def _ensure_folders(self):
         """Создаёт необходимые папки, если их нет."""
@@ -138,9 +140,9 @@ class ReportLogic:
 
     def _write_report_blocks(self, file):
         """Записывает данные всех блоков."""
-        for block_num in range(1, config.TOTAL_BLOCKS + 1):
+        for block_num in range(1, len(self.report_blocks) + 1):
             block_key = f"block_{block_num}"
-            block_data = config.REPORT_BLOCKS[block_key]
+            block_data = self.report_blocks[block_key]
 
             file.write(f"\n{block_data['title'].upper()}\n")
             file.write("-" * 70 + "\n\n")
@@ -320,9 +322,9 @@ class ReportLogic:
             story.append(Spacer(1, 0.4*cm))
 
             # Блоки
-            for block_num in range(1, config.TOTAL_BLOCKS + 1):
+            for block_num in range(1, len(self.report_blocks) + 1):
                 block_key = f"block_{block_num}"
-                block_data = config.REPORT_BLOCKS[block_key]
+                block_data = self.report_blocks[block_key]
 
                 story.append(Paragraph(block_data['title'].upper(), heading_style))
                 story.append(Spacer(1, 0.15*cm))
@@ -420,9 +422,9 @@ class ReportLogic:
             spacer.paragraph_format.space_after = Pt(6)
 
             # Блоки
-            for block_num in range(1, config.TOTAL_BLOCKS + 1):
+            for block_num in range(1, len(self.report_blocks) + 1):
                 block_key = f"block_{block_num}"
-                block_data = config.REPORT_BLOCKS[block_key]
+                block_data = self.report_blocks[block_key]
 
                 # Заголовок блока
                 heading = doc.add_heading(block_data['title'].upper(), level=1)

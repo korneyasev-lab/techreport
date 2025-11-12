@@ -1,6 +1,8 @@
 # config.py
 # Файл для хранения настроек логики и структуры отчётов.
 
+import os
+
 # --- Папки ---
 REPORTS_FOLDER = "reports"
 TEMPLATES_FOLDER = "templates"
@@ -127,3 +129,32 @@ ELEMENT_TYPES = {
     "text_small": "Маленькое текстовое поле (Entry)",
     "yes_no": "Выбор Да/Нет"
 }
+
+
+# --- Функция загрузки структуры отчёта ---
+def get_report_blocks():
+    """
+    Возвращает структуру блоков отчёта.
+    Если существует БД - загружает из неё, иначе - из REPORT_BLOCKS.
+    """
+    database_file = os.path.join("database", "config.db")
+
+    if os.path.exists(database_file):
+        # Загружаем из БД
+        try:
+            from database import ConfigDatabase
+            db = ConfigDatabase()
+            structure = db.get_report_structure()
+
+            # Обновляем TOTAL_BLOCKS
+            global TOTAL_BLOCKS
+            TOTAL_BLOCKS = len(structure)
+
+            return structure
+        except Exception as e:
+            print(f"Ошибка загрузки из БД: {e}")
+            # Возвращаем дефолтную структуру
+            return REPORT_BLOCKS
+    else:
+        # БД нет, возвращаем дефолтную структуру
+        return REPORT_BLOCKS

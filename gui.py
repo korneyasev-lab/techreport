@@ -8,6 +8,8 @@ import calendar
 import configgui
 import config
 from logic import ReportLogic
+from database import ConfigDatabase
+from editor import QuestionEditorWindow
 
 
 class ReportApp:
@@ -57,6 +59,9 @@ class ReportApp:
         # GUI данные
         self.current_block = 1
         self.current_widgets = {}
+
+        # Загрузка структуры отчёта из БД или config.py
+        self.report_blocks = config.get_report_blocks()
 
         self.show_main_screen()
 
@@ -136,6 +141,17 @@ class ReportApp:
             bg=configgui.COLORS["button_bg"],
             fg=configgui.COLORS["button_fg"],
             command=self.show_archive
+        ).pack(pady=self.padding["pady"] * 3)
+
+        tk.Button(
+            right_frame,
+            text="⚙️ Редактор вопросов",
+            font=self.FONT_MAIN_BUTTON,
+            width=25,
+            height=2,
+            bg=configgui.COLORS["button_bg"],
+            fg=configgui.COLORS["button_fg"],
+            command=self.open_editor
         ).pack(pady=self.padding["pady"] * 3)
 
         tk.Button(
@@ -337,7 +353,7 @@ class ReportApp:
         self.clear_container()
 
         block_key = f"block_{self.current_block}"
-        block_data = config.REPORT_BLOCKS[block_key]
+        block_data = self.report_blocks[block_key]
 
         # Заголовок
         header = f"Отчёт: {self.logic.report_params['week']}"
@@ -728,7 +744,7 @@ class ReportApp:
                 text = widget.get("1.0", "end-1c").strip()
                 # Не сохранять placeholder
                 block_key = f"block_{self.current_block}"
-                block_data = config.REPORT_BLOCKS[block_key]
+                block_data = self.report_blocks[block_key]
                 element_index = int(element_key.split('_')[-1])
                 placeholder = block_data['elements'][element_index].get('placeholder', '')
                 if text and text != placeholder:
@@ -738,7 +754,7 @@ class ReportApp:
                 value = widget.get().strip()
                 # Не сохранять placeholder
                 block_key = f"block_{self.current_block}"
-                block_data = config.REPORT_BLOCKS[block_key]
+                block_data = self.report_blocks[block_key]
                 element_index = int(element_key.split('_')[-1])
                 placeholder = block_data['elements'][element_index].get('placeholder', '')
                 if value and value != placeholder:
@@ -1089,3 +1105,11 @@ class ReportApp:
                     configgui.DIALOG_TITLES["error"],
                     message
                 )
+
+    # ============================================================
+    # РЕДАКТОР ВОПРОСОВ
+    # ============================================================
+
+    def open_editor(self):
+        """Открывает окно редактора вопросов."""
+        QuestionEditorWindow(self.root)
