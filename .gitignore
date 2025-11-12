@@ -12,3 +12,10 @@ __pycache__/
 venv/
 env/
 *.pyc
+
+# 4. Папки сборки PyInstaller
+# Временные файлы и скомпилированный .exe
+build/
+dist/
+*.spec
+!build.spec
